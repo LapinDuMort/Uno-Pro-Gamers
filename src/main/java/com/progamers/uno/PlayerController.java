@@ -12,22 +12,16 @@ import java.util.ArrayList;
 @Setter
 public class PlayerController {
 
-    //private String playerName;
-    //private Integer playerScore;
     private Boolean hasUno;
     private ArrayList<Card> playerHand;
     private int currentSelected;
 
     public PlayerController() {
-        //this.playerName = name;
-        //this.playerScore = 0;
         this.hasUno = false;
         this.playerHand = new ArrayList<Card>();
-
         this.currentSelected = 0;
     }
     public Card getCurrentSelectedCard(int index) throws Exception {
-
         // Check if the player's hand is empty
         if (playerHand.isEmpty()) {
             throw new Exception("Player hand is empty");
@@ -40,7 +34,6 @@ public class PlayerController {
     }
 
     public void playCard(int index){
-
         // Implementation for playing a card from the player's hand
         //get gamestate
         //use gamestate to check card against ruleset
@@ -48,27 +41,26 @@ public class PlayerController {
     }
 
     public boolean drawStartingHand(int HandSize){
-        //Drawing the starting hand
+        // Drawing the starting hand
+        // Will be removed later and drawCard will be called externally to pass
+        // a card from a deck to the player
         for(int i = 0; i < HandSize; i++)
         {
-            // Card newCard = Deck.getInstance().drawCard();
-            // if (drawnCard == null) {
-            //     return false;
-            // }
-            // playerHand.add(drawnCard);
-            playerHand.add(Card.builder().colour(Colour.Red).value(Value.getValue(i)).build());
+            drawCard(Card.builder().colour(Colour.Red).value(Value.getValue(i)).build());
         }
         return true;
     }
 
     public void drawCard (Card card) {
+        // Adds a given card to the player's hand
+        // Done this way so that hasUno can be unset
         playerHand.add(card);
         if (playerHand.size() > 1) {
             hasUno = false;
         }
     }
 
-    public void DeclareUno(){
+    public void DeclareUno() {
         // Implementation for declaring UNO
         if (playerHand.size() == 1)
         {
