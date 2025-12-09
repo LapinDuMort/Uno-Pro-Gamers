@@ -13,4 +13,8 @@ public class Deck {
     public Card drawCard(){
         return this.cards.removeFirst();
     }
+
+    public Integer getDeckSize(){
+        return this.cards.size();
+    }
 }
