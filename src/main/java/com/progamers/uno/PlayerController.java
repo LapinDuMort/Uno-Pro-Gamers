@@ -11,14 +11,14 @@ public class PlayerController {
 
     //private String playerName;
     //private Integer playerScore;
-    //private Boolean hasUno;
+    private Boolean hasUno;
     private ArrayList<String> playerHand;
     private int currentSelected;
 
     public PlayerController() {
         //this.playerName = name;
         //this.playerScore = 0;
-        //this.hasUno = false;
+        this.hasUno = false;
         this.playerHand = new ArrayList<String>();
 
         this.currentSelected = 0;
@@ -58,6 +58,18 @@ public class PlayerController {
             playerHand.add("Sample Card " + (i + 1));
         }
         return true;
+    }
+
+    public void DeclareUno(){
+        // Implementation for declaring UNO
+        if (playerHand.size() == 1)
+        {
+            hasUno = true;
+        }
+        else
+        {
+            hasUno = false;
+        }
     }
 
     @Override

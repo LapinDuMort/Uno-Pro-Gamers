@@ -68,9 +68,27 @@ class PlayerControllerTests {
         player.getPlayerHand().add("Blue 5");
         player.setCurrentSelected(2);
 
-
         String expected = "PlayerController{playerHand=[Red 5, Blue 5], currentSelected=2}";
         assertEquals(expected, player.toString());
         assertEquals("Index is out of bounds", player.getCurrentSelectedCard(player.getCurrentSelected()));
+    }
+
+    @Test
+    void TestUnoFalse() {
+        PlayerController player = new PlayerController();
+        player.getPlayerHand().add("Red 5");
+        player.getPlayerHand().add("Blue 5");
+        player.DeclareUno();
+
+        assertEquals(false, player.getHasUno());
+    }
+
+    @Test
+    void TestUnoTrue() {
+        PlayerController player = new PlayerController();
+        player.getPlayerHand().add("Red 5");
+        player.DeclareUno();
+
+        assertEquals(true, player.getHasUno());
     }
 }
