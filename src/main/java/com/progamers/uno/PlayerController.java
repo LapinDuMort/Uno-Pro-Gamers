@@ -1,6 +1,8 @@
 package com.progamers.uno;
 
 import com.progamers.uno.domain.Card;
+import com.progamers.uno.domain.Colour;
+import com.progamers.uno.domain.Value;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -54,9 +56,16 @@ public class PlayerController {
             //     return false;
             // }
             // playerHand.add(drawnCard);
-            playerHand.add("Sample Card " + (i + 1));
+            playerHand.add(Card.builder().colour(Colour.Red).value(Value.getValue(i)).build());
         }
         return true;
+    }
+
+    public void drawCard (Card card) {
+        playerHand.add(card);
+        if (playerHand.size() > 1) {
+            hasUno = false;
+        }
     }
 
     public void DeclareUno(){
