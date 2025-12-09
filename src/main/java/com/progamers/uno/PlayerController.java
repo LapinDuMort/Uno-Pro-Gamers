@@ -1,5 +1,6 @@
 package com.progamers.uno;
 
+import com.progamers.uno.domain.Card;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,28 +13,26 @@ public class PlayerController {
     //private String playerName;
     //private Integer playerScore;
     private Boolean hasUno;
-    private ArrayList<String> playerHand;
+    private ArrayList<Card> playerHand;
     private int currentSelected;
 
     public PlayerController() {
         //this.playerName = name;
         //this.playerScore = 0;
         this.hasUno = false;
-        this.playerHand = new ArrayList<String>();
+        this.playerHand = new ArrayList<Card>();
 
         this.currentSelected = 0;
     }
-    public String getCurrentSelectedCard(int index){
+    public Card getCurrentSelectedCard(int index) throws Exception {
 
         // Check if the player's hand is empty
-        if(playerHand.isEmpty())
-        {
-            return "Player hand is empty";
+        if (playerHand.isEmpty()) {
+            throw new Exception("Player hand is empty");
         }
         // Check if the index is within bounds
-        if(index < 0 || index >= playerHand.size())
-        {
-            return "Index is out of bounds";
+        if (index < 0 || index >= playerHand.size()) {
+            throw new Exception("Index is out of bounds");
         }
         return(playerHand.get(index));
     }

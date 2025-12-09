@@ -1,6 +1,8 @@
 package com.progamers.uno;
 
+import com.progamers.uno.domain.Card;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class PlayerControllerTests {
@@ -15,8 +17,8 @@ class PlayerControllerTests {
 
     @Test
     void AddingOneElements() {
-        PlayerController player = new PlayerController();
-        player.getPlayerHand().add("Red 5");
+        PlayerController player = new PlayerController();;
+        player.getPlayerHand().add(Card.builder().build());
 
         assertEquals(1, player.getPlayerHand().size());
     }
