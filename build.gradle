@@ -37,3 +37,14 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+tasks.register("listTestFiles") {
+    group = "verification"
+    description = "Lists all test files in the project"
+
+    doLast {
+        sourceSets.test.allSource.files
+            .sort{ it.path }
+            .each { file -> println "TEST FILE $file" }
+    }
+}
