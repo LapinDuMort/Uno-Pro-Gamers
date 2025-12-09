@@ -10,4 +10,7 @@ public class Deck {
         this.cards = new ArrayList<Card>(cards);
     }
 
+    public Card drawCard(){
+        return this.cards.removeFirst();
+    }
 }
