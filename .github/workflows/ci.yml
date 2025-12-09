@@ -28,6 +28,10 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
+      # show detected test files using gradle task
+      - name: Show detected test files
+        run: ./gradlew listTestFiles
+
       # runs tests
       - name: Run tests
-        run: ./gradlew test --info
+        run: ./gradlew test --debug
