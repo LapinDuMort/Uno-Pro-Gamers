@@ -24,21 +24,21 @@ class PlayerControllerTests {
     }
 
     @Test
-    void drawCardingOneElements() {
+    void addCardToHandingOneElements() {
         Card card = Card.builder().value(Value.Five).colour(Colour.Red).build();
-        player.drawCard(card);
+        player.addCardToHand(card);
 
         assertEquals(1, player.getPlayerHand().size());
     }
 
     @Test
-    void drawCardingFiveElements() {
+    void addCardToHandingFiveElements() {
         Card card = Card.builder().value(Value.Five).colour(Colour.Red).build();
-        player.drawCard(card);
-        player.drawCard(card);
-        player.drawCard(card);
-        player.drawCard(card);
-        player.drawCard(card);
+        player.addCardToHand(card);
+        player.addCardToHand(card);
+        player.addCardToHand(card);
+        player.addCardToHand(card);
+        player.addCardToHand(card);
 
         assertEquals(5, player.getPlayerHand().size());
     }
@@ -64,12 +64,12 @@ class PlayerControllerTests {
     }
 
     @Test
-    void drawCardAndGetCertainCards() {
+    void addCardToHandAndGetCertainCards() {
         Card cardRedFive = Card.builder().value(Value.Five).colour(Colour.Red).build();
-        player.drawCard(cardRedFive);
+        player.addCardToHand(cardRedFive);
 
         Card cardNineBlue = Card.builder().value(Value.Nine).colour(Colour.Blue).build();
-        player.drawCard(cardNineBlue);
+        player.addCardToHand(cardNineBlue);
 
         assertDoesNotThrow(() -> {
             Card card = player.getCurrentSelectedCard(0);
@@ -83,8 +83,8 @@ class PlayerControllerTests {
 
 //    @Test
 //    void TestToString() {
-//        player.drawCard("Red 5");
-//        player.drawCard("Blue 5");
+//        player.addCardToHand("Red 5");
+//        player.addCardToHand("Blue 5");
 //        player.setCurrentSelected(2);
 //
 //        String expected = "PlayerController{playerHand=[Red 5, Blue 5], currentSelected=2}";
@@ -95,10 +95,10 @@ class PlayerControllerTests {
     @Test
     void TestUnoFalse() {
         Card cardRedFive = Card.builder().value(Value.Five).colour(Colour.Red).build();
-        player.drawCard(cardRedFive);
+        player.addCardToHand(cardRedFive);
 
         Card cardNineBlue = Card.builder().value(Value.Nine).colour(Colour.Blue).build();
-        player.drawCard(cardNineBlue);
+        player.addCardToHand(cardNineBlue);
 
         assertEquals(false, player.getHasUno());
     }
@@ -106,7 +106,7 @@ class PlayerControllerTests {
     @Test
     void TestUnoTrue() {
         Card cardRedFive = Card.builder().value(Value.Five).colour(Colour.Red).build();
-        player.drawCard(cardRedFive);
+        player.addCardToHand(cardRedFive);
 
         player.DeclareUno();
 
@@ -116,12 +116,12 @@ class PlayerControllerTests {
     @Test
     void TestUnoResetsToFalse() {
         Card cardRedFive = Card.builder().value(Value.Five).colour(Colour.Red).build();
-        player.drawCard(cardRedFive);
+        player.addCardToHand(cardRedFive);
 
         player.DeclareUno();
 
         Card cardBlueFive = Card.builder().value(Value.Five).colour(Colour.Blue).build();
-        player.drawCard(cardBlueFive);
+        player.addCardToHand(cardBlueFive);
 
         assertEquals(false, player.getHasUno());
     }

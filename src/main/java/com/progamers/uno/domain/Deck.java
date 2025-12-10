@@ -1,6 +1,7 @@
 package com.progamers.uno.domain;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Deck {
@@ -13,4 +14,12 @@ public class Deck {
     public Card drawCard(){
         return this.cards.removeFirst();
     }
+
+    public Integer getDeckSize(){
+        return this.cards.size();
+    }
+
+    public void shuffle() {
+        Collections.shuffle(this.cards); }
+
 }

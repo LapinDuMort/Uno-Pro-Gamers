@@ -10,8 +10,9 @@ public class DeckFactoryTest {
     public void deckConstructionTest(){
         DeckFactory deckFactory = new StandardDeckFactory();
         Deck newDeck = deckFactory.createDeck();
+        Integer deckSize = newDeck.getDeckSize();
         String result = newDeck.drawCard().toString();
-        System.out.println(result);
         assert result.equals("Card(colour=Red, value=Zero)");
+        assert deckSize.equals(108);
     }
 }
