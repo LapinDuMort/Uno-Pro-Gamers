@@ -14,9 +14,14 @@ public class Game {
     public Game() {
         DeckFactory deckFactory = new StandardDeckFactory();
         cardDeck = deckFactory.createDeck();
+        discardPile = new DiscardPile();
     }
 
     public Deck getCardDeck() { return this.cardDeck; }
+
+    public DiscardPile getDiscardPile() {
+        return this.discardPile;
+    }
 
     public void drawCards(PlayerController player, int numCards) {
         for (int i=0; i < numCards; i++) {
