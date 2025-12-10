@@ -1,13 +1,35 @@
 package com.progamers.uno;
 
+import com.progamers.uno.domain.Deck;
+import com.progamers.uno.domain.game.Game;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import java.util.Scanner;
 
 @SpringBootApplication
 public class UnoApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(UnoApplication.class, args);
+        Scanner scanner = new Scanner(System.in);
+        Game game = new Game();
+        game.getCardDeck().shuffle();
+        PlayerController player1 = new PlayerController();
+        game.drawCards(player1, 7);
+        game.getDiscardPile().addToPile(game.getCardDeck().drawCard());
+
+        while(true) {
+            System.out.println("Current card in pile: " + game.getDiscardPile().getTopCard().toString());
+            player1.showHand();
+
+            int decision = scanner.nextInt();
+            if (decision == 0) {
+                player1.addCardToHand(game.getCardDeck().drawCard());
+            } else {
+                game.getDiscardPile().addToPile(player1.playCard(decision - 1));
+            }
+        }
 	}
 
 }
