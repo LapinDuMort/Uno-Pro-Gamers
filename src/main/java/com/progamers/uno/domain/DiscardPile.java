@@ -10,14 +10,14 @@ public class DiscardPile {
         this.playedCards  = new ArrayList<Card>();
     }
     public void addToPile(Card card){
-        playedCards.add(card);
+        this.playedCards.add(card);
     }
     public Card getTopCard(){
         return playedCards.getLast();
     }
     public List<Card> refillDeck(){
         Card cardInPlay = this.playedCards.removeLast();
-        List<Card> returningCards = this.playedCards;
+        List<Card> returningCards = new ArrayList<>(playedCards);
         this.playedCards.clear();
         this.playedCards.add(cardInPlay);
         return returningCards;
