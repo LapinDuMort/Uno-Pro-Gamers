@@ -19,6 +19,10 @@ public class Deck {
         return this.cards.size();
     }
 
+    public void refillEmptyDeck(List<Card> refillCards){
+        this.cards.addAll(refillCards);
+    }
+
     public void shuffle() {
         Collections.shuffle(this.cards); }
 
