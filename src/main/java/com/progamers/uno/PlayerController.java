@@ -78,6 +78,12 @@ public class PlayerController {
         return "PlayerController{" + "playerHand=" + playerHand + ", currentSelected=" + currentSelected + '}';
     }
 
+    public void showHand() {
+        for (int i = 0; i < playerHand.size(); i++) {
+            System.out.printf("%d: %s %s%n", i + 1, playerHand.get(i).getColour(), playerHand.get(i).getValue());
+        }
+    }
+
     public int getHandSize() {
         return playerHand.size();
     }
