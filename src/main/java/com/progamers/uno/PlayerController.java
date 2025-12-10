@@ -40,18 +40,19 @@ public class PlayerController {
         //if valid pop card from hand and gamesate ends player turn
     }
 
+    @Deprecated
     public boolean drawStartingHand(int HandSize){
         // Drawing the starting hand
         // Will be removed later and drawCard will be called externally to pass
         // a card from a deck to the player
         for(int i = 0; i < HandSize; i++)
         {
-            drawCard(Card.builder().colour(Colour.Red).value(Value.getValue(i)).build());
+            addCardToHand(Card.builder().colour(Colour.Red).value(Value.getValue(i)).build());
         }
         return true;
     }
 
-    public void drawCard (Card card) {
+    public void addCardToHand (Card card) {
         // Adds a given card to the player's hand
         // Done this way so that hasUno can be unset
         playerHand.add(card);
