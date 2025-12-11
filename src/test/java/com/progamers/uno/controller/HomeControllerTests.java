@@ -20,6 +20,60 @@ public class HomeControllerTests {
     @Autowired
     MockMvc mockMvc;
 
+    /* --- testing uno declaration --- */
+
+    @Test
+    void testWhenDeclareUno_thenRedirectsToPlayerPage() throws Exception {
+        mockMvc.perform(post("/uno"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/playerpage"));
+    }
+
+    @Test
+    void testWhenPlayFinalCardWithoutUnoDeclared_thenDrawsTwoCardsAndGameContinues() throws Exception {
+        // new game with 7 cards
+        // play down to 6 cards
+        // do NOT declare uno
+        for (int i=0; i<6; i++) {
+            mockMvc.perform(post("/play")
+                            .param("cardIndex", "0"))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/playerpage"));
+        }
+
+        // final card
+        // uno NOT declared
+        // try to play final card
+        // expect game NOT to end - no redirect to /gameover
+        mockMvc.perform(post("/play")
+                .param("cardIndex", "0"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/playerpage"));
+    }
+
+    @Test
+    void testWhenDeclareUnoAndPlayFinalCard_thenRedirectsToGameOver() throws Exception {
+        // new game with 7 cards
+        // play down to 6 cards
+        for (int i=0; i<6; i++) {
+            mockMvc.perform(post("/play")
+                            .param("cardIndex", "0"))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/playerpage"));
+        }
+
+        // declare uno
+        mockMvc.perform(post("/uno"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/playerpage"));
+
+        // expect to redirect to /gameover
+        // after playing final card
+        mockMvc.perform(post("/play").param("cardIndex", "0"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/gameover"));
+    }
+
     /* --- testing win condition --- */
 
     @Test
@@ -34,36 +88,29 @@ public class HomeControllerTests {
     }
 
     @Test
-    void testWhenFinalCardPlayed_thenRedirectToGameOver() throws Exception {
-        // new game with 7 cards
-        // play 6 cards
-        // each play should redirect to /playerpage
-        for (int i=0; i<6; i++) {
-            mockMvc.perform(post("/play")
-                    .param("cardIndex", "0"))
-                    .andExpect(status().is3xxRedirection())
-                    .andExpect(redirectedUrl("/playerpage"));
-        }
-
-        // we expect there to be 1 card left
-        // playing final card should trigger win condition
-        // redirec to /gameover
-        mockMvc.perform(post("/play")
-                .param("cardIndex", "0"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/gameover"));
-    }
-
-    @Test
     void testWhenGameOverIsTrue_thenPlayAndDrawRedirectToGameOver() throws Exception {
         // when gameOver is true
         // play() and draw() should redirect to game over screen
         // until a new game is started
 
         // push player to winning position
-        for (int i=0; i<7; i++) {
+        // update: play down to final card
+        // do not play all cards before declaring uno
+        for (int i=0; i<6; i++) {
             mockMvc.perform(post("/play").param("cardIndex", "0"));
         }
+
+        // update: declare uno
+        mockMvc.perform(post("/uno"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/playerpage"));
+
+        // update: play final card to win game
+        // expect redirect to /gameover
+        mockMvc.perform(post("/play")
+                .param("cardIndex", "0"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/gameover"));
 
         // we expect game to be over
         // trying to play card should redirect to /gameover
