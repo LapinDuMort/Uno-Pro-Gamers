@@ -43,6 +43,19 @@
         </form>
         </div>
     </div>
+
+    <!-- UNO declaration controls -->
+    <div class="uno-controls">
+        <p th:if="${hasUno}">UNO declared!</p>
+        <p th:if="${!hasUno}">UNO not declared!</p>
+
+        <form th:if="${!gameOver} and ${#lists.size(playerHand)} == 1 and ${!hasUno}"
+              th:action="@{/uno}"
+              method="post">
+            <button type="submit" class="uno-button">Declare UNO</button>
+        </form>
+    </div>
+
     </body>
     </html>
     <script>
