@@ -67,10 +67,10 @@
 
         // Function to replace card string with number
         function convertCardValues(containerSelector) {
-            document.querySelectorAll(containerSelector).forEach(el => {
-                const text = el.textContent.trim().toUpperCase();
+            document.querySelectorAll(containerSelector).forEach(i => {
+                const text = i.textContent.trim().toUpperCase();
                 if (valueMap.hasOwnProperty(text)) {
-                    el.textContent = valueMap[text];
+                    i.textContent = valueMap[text];
                 }
             });
         }
