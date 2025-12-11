@@ -1,11 +1,7 @@
 package com.progamers.uno.controller;
 
 import com.progamers.uno.PlayerController;
-import com.progamers.uno.domain.Card;
-import com.progamers.uno.domain.Colour;
-import com.progamers.uno.domain.Deck;
-import com.progamers.uno.domain.Value;
-import com.progamers.uno.domain.factory.StandardDeckFactory;
+import com.progamers.uno.domain.game.Game;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,23 +9,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
 
-import java.util.ArrayList;
-
 @Controller
 public class HomeController {
 
-    private ArrayList<Card> playerHand = new ArrayList<>();
-    private Deck deck = new StandardDeckFactory().createDeck();
-    private PlayerController playerController = new PlayerController();
-    private Card discardCard = Card.builder().colour(Colour.Red).value(Value.Five).build();
-
+    Game Mygame;
+    PlayerController MyplayerController;
     public HomeController() {
-        deck.shuffle();
+        Mygame = new Game();
+        Mygame.getCardDeck().shuffle();
+        Mygame.getDiscardPile().addToPile(Mygame.getCardDeck().drawCard());
+        MyplayerController = new PlayerController();
 
-        // Deal 7 cards to the player
-        for (int i = 0; i < 7; i++) {
-            playerHand.add(deck.drawCard());
-        }
+        Mygame.drawCards(MyplayerController, 7);
     }
 
     @GetMapping("/")
@@ -40,25 +31,26 @@ public class HomeController {
     @GetMapping("/playerpage")
     public String ViewPlayer(Model model) {
 
-        model.addAttribute("playerHand", playerHand);
-        model.addAttribute("discardCard", discardCard);
+        model.addAttribute("playerHand", MyplayerController.getPlayerHand());
+        model.addAttribute("discardCard", Mygame.getDiscardPile().getTopCard());
         return "UnoPlayerPage";
     }
 
     @PostMapping("/draw")
     public RedirectView drawCard() {
 
-        playerHand.add(deck.drawCard());
+        Mygame.drawCards(MyplayerController, 1);
         return new RedirectView("/playerpage");
     }
 
     @PostMapping("/play")
-    public RedirectView playCard(@RequestParam("cardIndex") int cardIndex, Model model) {
-        Card playedCard = playerHand.remove(cardIndex);
-        discardCard = playedCard;
+    public RedirectView playCard(@RequestParam("cardIndex") int cardIndex, Model model) throws Exception {
 
-        model.addAttribute("playerHand", playerHand);
-        model.addAttribute("discardCard", discardCard);
+        Mygame.getDiscardPile().addToPile(MyplayerController.getCurrentSelectedCard(cardIndex));
+        Mygame.getDiscardPile().addToPile(MyplayerController.playCard(cardIndex));
+
+        model.addAttribute("playerHand", MyplayerController.getPlayerHand());
+        model.addAttribute("discardCard", Mygame.getDiscardPile().getTopCard());
         return new RedirectView("/playerpage");
     }
 }
