@@ -1,4 +1,4 @@
-package com.progamers.uno.domain;
+package com.progamers.uno.domain.cards;
 
 @lombok.Builder @lombok.Value
 public class Card {

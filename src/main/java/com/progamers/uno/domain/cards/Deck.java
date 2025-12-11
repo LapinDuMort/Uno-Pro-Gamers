@@ -1,4 +1,4 @@
-package com.progamers.uno.domain;
+package com.progamers.uno.domain.cards;
 
 import java.util.ArrayList;
 import java.util.Collections;

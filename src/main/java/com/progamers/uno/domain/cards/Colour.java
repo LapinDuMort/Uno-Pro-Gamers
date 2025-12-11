@@ -1,4 +1,4 @@
-package com.progamers.uno.domain;
+package com.progamers.uno.domain.cards;
 
 //Create an Enum (group of constant values) to represent the games 5 colours/suits
 public enum Colour {
