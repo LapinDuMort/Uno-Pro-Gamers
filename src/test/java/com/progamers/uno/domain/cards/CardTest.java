@@ -1,8 +1,5 @@
-package com.progamers.uno.domaintests;
+package com.progamers.uno.domain.cards;
 
-import com.progamers.uno.domain.Card;
-import com.progamers.uno.domain.Colour;
-import com.progamers.uno.domain.Value;
 import org.junit.jupiter.api.Test;
 
 
