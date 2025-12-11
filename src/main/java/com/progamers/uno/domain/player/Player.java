@@ -12,13 +12,13 @@ import java.util.List;
 
 @Getter
 @Setter
-public class PlayerController {
+public class Player {
 
     private Boolean hasUno;
     private List<Card> playerHand;
     private int currentSelected;
 
-    public PlayerController() {
+    public Player() {
         this.hasUno = false;
         this.playerHand = new ArrayList<Card>();
         this.currentSelected = 0;
