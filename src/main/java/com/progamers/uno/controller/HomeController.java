@@ -74,6 +74,7 @@ public class HomeController {
         }
 
         Mygame.getDiscardPile().addToPile(MyplayerController.getCurrentSelectedCard(cardIndex));
+        Mygame.getDiscardPile().addToPile(MyplayerController.playCard(cardIndex));
 
         // win condition
         // if hand is empty
