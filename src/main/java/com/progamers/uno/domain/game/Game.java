@@ -1,6 +1,6 @@
 package com.progamers.uno.domain.game;
 
-import com.progamers.uno.domain.player.PlayerController;
+import com.progamers.uno.domain.player.Player;
 import com.progamers.uno.domain.cards.Card;
 import com.progamers.uno.domain.cards.Colour;
 import com.progamers.uno.domain.cards.Deck;
@@ -24,7 +24,7 @@ public class Game {
         return this.discardPile;
     }
 
-    public void drawCards(PlayerController player, int numCards) {
+    public void drawCards(Player player, int numCards) {
         for (int i=0; i < numCards; i++) {
             //Check if deck empty
             //If deck empty, call DiscardPile.RefillDeck

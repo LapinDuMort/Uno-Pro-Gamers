@@ -1,6 +1,6 @@
 package com.progamers.uno.service;
 
-import com.progamers.uno.domain.player.PlayerController;
+import com.progamers.uno.domain.player.Player;
 import com.progamers.uno.domain.cards.Card;
 import com.progamers.uno.domain.game.Game;
 import lombok.Getter;
@@ -13,7 +13,7 @@ import java.util.List;
 public class GameService {
 
     private final Game game;
-    private final PlayerController player;
+    private final Player player;
     private boolean gameOver;
 
     public GameService() {
@@ -22,7 +22,7 @@ public class GameService {
         this.game.getDiscardPile().addToPile(
                 this.game.getCardDeck().drawCard()
         );
-        this.player = new PlayerController();
+        this.player = new Player();
         this.game.drawCards(this.player, 7);
     }
 

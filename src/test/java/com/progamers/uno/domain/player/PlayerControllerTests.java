@@ -9,11 +9,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PlayerControllerTests {
-    PlayerController player;
+    Player player;
 
     @BeforeEach
     void setUp() {
-        player = new PlayerController();
+        player = new Player();
     }
 
     @Test

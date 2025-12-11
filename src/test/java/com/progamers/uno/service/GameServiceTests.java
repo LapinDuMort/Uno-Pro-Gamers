@@ -4,7 +4,7 @@ import com.progamers.uno.domain.cards.Card;
 import com.progamers.uno.domain.cards.Colour;
 import com.progamers.uno.domain.cards.Value;
 import com.progamers.uno.domain.game.Game;
-import com.progamers.uno.domain.player.PlayerController;
+import com.progamers.uno.domain.player.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +14,7 @@ public class GameServiceTests {
 
     private GameService gameService;
     private Game game;
-    private PlayerController player;
+    private Player player;
 
     @BeforeEach
     void setup() {

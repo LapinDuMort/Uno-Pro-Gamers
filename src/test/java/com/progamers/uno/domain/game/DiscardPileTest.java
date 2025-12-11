@@ -1,6 +1,6 @@
 package com.progamers.uno.domain.game;
 
-import com.progamers.uno.domain.player.PlayerController;
+import com.progamers.uno.domain.player.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -8,12 +8,13 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class DiscardPileTest {
     Game game;
-    PlayerController player;
+    Player player;
     DiscardPile testDiscardPile;
+
     @BeforeEach
     void setup(){
         game = new Game();
-        player = new PlayerController();
+        player = new Player();
         testDiscardPile = new DiscardPile();
     }
 
