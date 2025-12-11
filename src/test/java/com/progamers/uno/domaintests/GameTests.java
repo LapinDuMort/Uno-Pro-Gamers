@@ -1,10 +1,7 @@
 package com.progamers.uno.domaintests;
 
-import com.progamers.uno.PlayerController;
-import com.progamers.uno.domain.Card;
-import com.progamers.uno.domain.Colour;
-import com.progamers.uno.domain.Deck;
-import com.progamers.uno.domain.Value;
+
+import com.progamers.uno.domain.*;
 import com.progamers.uno.domain.game.Game;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,12 +13,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class GameTests {
 
     Game game;
-    PlayerController player;
+    Player player;
 
     @BeforeEach
     void setup() {
         game = new Game();
-        player = new PlayerController();
+        player = new Player();
     }
 
     @Test
