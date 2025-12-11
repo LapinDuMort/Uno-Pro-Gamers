@@ -33,11 +33,12 @@ public class PlayerController {
         return(playerHand.get(index));
     }
 
-    public void playCard(int index){
+    public Card playCard(int index){
         // Implementation for playing a card from the player's hand
         //get gamestate
         //use gamestate to check card against ruleset
         //if valid pop card from hand and gamesate ends player turn
+        return playerHand.remove(index);
     }
 
     @Deprecated
