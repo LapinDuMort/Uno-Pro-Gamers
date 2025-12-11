@@ -1,8 +1,5 @@
-package com.progamers.uno;
+package com.progamers.uno.domain;
 
-import com.progamers.uno.domain.Card;
-import com.progamers.uno.domain.Colour;
-import com.progamers.uno.domain.Value;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,13 +9,13 @@ import java.util.List;
 
 @Getter
 @Setter
-public class PlayerController {
+public class Player {
 
     private Boolean hasUno;
     private List<Card> playerHand;
     private int currentSelected;
 
-    public PlayerController() {
+    public Player() {
         this.hasUno = false;
         this.playerHand = new ArrayList<Card>();
         this.currentSelected = 0;
