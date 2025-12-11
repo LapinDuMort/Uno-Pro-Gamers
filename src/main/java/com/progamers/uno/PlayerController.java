@@ -7,13 +7,15 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Getter
 @Setter
 public class PlayerController {
 
     private Boolean hasUno;
-    private ArrayList<Card> playerHand;
+    private List<Card> playerHand;
     private int currentSelected;
 
     public PlayerController() {
@@ -74,6 +76,10 @@ public class PlayerController {
         }
     }
 
+    public void handSort(){
+        Collections.sort(this.playerHand, new cardComparator());
+    }
+
     @Override
     public String toString() {
         return "PlayerController{" + "playerHand=" + playerHand + ", currentSelected=" + currentSelected + '}';
@@ -87,5 +93,14 @@ public class PlayerController {
 
     public int getHandSize() {
         return playerHand.size();
+    }
+
+
+}
+
+class cardComparator implements java.util.Comparator<Card>{
+    @Override
+    public int compare(Card a, Card b){
+        return (a.getColour().colourNumber + a.getValue().valueNumber) - (b.getColour().colourNumber + b.getValue().valueNumber);
     }
 }
