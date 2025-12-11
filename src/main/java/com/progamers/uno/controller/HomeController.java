@@ -35,7 +35,6 @@ public class HomeController {
 
     @GetMapping("/playerpage")
     public String ViewPlayer(Model model) {
-
         model.addAttribute("playerHand", MyplayerController.getPlayerHand());
         model.addAttribute("discardCard", Mygame.getDiscardPile().getTopCard());
         model.addAttribute("hasUno", MyplayerController.getHasUno());
@@ -67,14 +66,15 @@ public class HomeController {
 
 
         if(Mygame.isValidMove(Mygame.getDiscardPile().getTopCard(), MyplayerController.getCurrentSelectedCard(cardIndex))){
-            // penalty for not declaring uno
-            // player tries to play their final card while hasUno is false
-            if (MyplayerController.getHandSize() == 1 && !MyplayerController.getHasUno()) {
-                // draw 2 cards automatically instead of playing card
-                Mygame.drawCards(MyplayerController, 2);
-                // redirect to /playerpage
-                return new RedirectView("/playerpage");
-            }
+          // penalty for not declaring uno
+        // player tries to play their final card while hasUno is false
+        if (MyplayerController.getHandSize() == 1 && !MyplayerController.getHasUno())
+        {
+            // draw 2 cards automatically instead of playing card
+            Mygame.drawCards(MyplayerController, 2);
+            // redirect to /playerpage
+            return new RedirectView("/playerpage");
+        }
             Mygame.getDiscardPile().addToPile(MyplayerController.playCard(cardIndex));
         }
 
