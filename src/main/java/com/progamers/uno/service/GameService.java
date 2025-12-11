@@ -1,7 +1,7 @@
 package com.progamers.uno.service;
 
-import com.progamers.uno.PlayerController;
-import com.progamers.uno.domain.Card;
+import com.progamers.uno.domain.player.PlayerController;
+import com.progamers.uno.domain.cards.Card;
 import com.progamers.uno.domain.game.Game;
 import lombok.Getter;
 import org.springframework.stereotype.Service;
