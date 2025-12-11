@@ -1,19 +1,20 @@
-package com.progamers.uno;
+package com.progamers.uno.domaintests;
 
 import com.progamers.uno.domain.Card;
 import com.progamers.uno.domain.Colour;
+import com.progamers.uno.domain.Player;
 import com.progamers.uno.domain.Value;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class PlayerControllerTests {
-    PlayerController player;
+class PlayerTests {
+    Player player;
 
     @BeforeEach
     void setUp() {
-        player = new PlayerController();
+        player = new Player();
     }
 
     @Test

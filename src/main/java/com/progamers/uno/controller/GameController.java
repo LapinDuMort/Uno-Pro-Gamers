@@ -1,6 +1,6 @@
 package com.progamers.uno.controller;
 
-import com.progamers.uno.PlayerController;
+import com.progamers.uno.domain.Player;
 import com.progamers.uno.domain.game.Game;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,20 +10,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
 
 @Controller
-public class HomeController {
+public class GameController {
 
     Game Mygame;
-    PlayerController MyplayerController;
+    Player MyplayerController;
 
     // track whether game is over
     // i.e. is there a winner?
     private boolean gameOver = false;
 
-    public HomeController() {
+    public GameController() {
         Mygame = new Game();
         Mygame.getCardDeck().shuffle();
         Mygame.getDiscardPile().addToPile(Mygame.getCardDeck().drawCard());
-        MyplayerController = new PlayerController();
+        MyplayerController = new Player();
 
         Mygame.drawCards(MyplayerController, 7);
     }
