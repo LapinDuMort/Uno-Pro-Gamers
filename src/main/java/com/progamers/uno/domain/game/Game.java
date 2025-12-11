@@ -1,12 +1,11 @@
 package com.progamers.uno.domain.game;
 
-import com.progamers.uno.PlayerController;
-import com.progamers.uno.domain.Card;
-import com.progamers.uno.domain.Colour;
-import com.progamers.uno.domain.Deck;
-import com.progamers.uno.domain.DiscardPile;
-import com.progamers.uno.domain.factory.DeckFactory;
-import com.progamers.uno.domain.factory.StandardDeckFactory;
+import com.progamers.uno.domain.player.PlayerController;
+import com.progamers.uno.domain.cards.Card;
+import com.progamers.uno.domain.cards.Colour;
+import com.progamers.uno.domain.cards.Deck;
+import com.progamers.uno.domain.cards.factory.DeckFactory;
+import com.progamers.uno.domain.cards.factory.StandardDeckFactory;
 
 public class Game {
 
