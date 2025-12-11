@@ -1,9 +1,8 @@
 package com.progamers.uno.domain.game;
 
-
-import com.progamers.uno.domain.cards.Card;
-import com.progamers.uno.domain.cards.Colour;
-import com.progamers.uno.domain.cards.Value;
+import com.progamers.uno.domain.Card;
+import com.progamers.uno.domain.Colour;
+import com.progamers.uno.domain.Value;
 
 public class ValidityChecker {
     public static boolean isValid(Card topCard, Card selectedCard) {
