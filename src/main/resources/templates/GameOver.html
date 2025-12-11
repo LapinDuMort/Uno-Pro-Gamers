@@ -1,0 +1,26 @@
+<html lang="en"
+    xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>UNO - You Win!</title>
+</head>
+<body>
+<main>
+    <h1>UNO!</h1>
+    <h3>You played your final card - you win!</h3>
+
+    <p>
+        Last card played:
+        <span th:text="${discardCard.colour}"></span>
+        <span th:text="${discardCard.value}"></span>
+    </p>
+
+    <p th:if="${#lists.isEmpty(playerHand)}">
+        Your hand is empty. Game over.
+    </p>
+
+    <a th:href="@{/}">Back to Main Menu</a>
+</main>
+</body>
+</html>
