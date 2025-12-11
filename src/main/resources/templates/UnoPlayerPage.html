@@ -26,8 +26,10 @@
         </div>
     </div>
     <h2>Your Hand</h2>
+    <div th:text="'Hand Size - ' + ${playerHand.size()}"></div>
     <div class="hand"
          th:with="cardCount=${playerHand.size()}"
+
          th:style="|--total-cards:${cardCount};
              --spacing-unit: ${cardCount > 1 ?#numbers.formatDecimal( (90 * 10 - 110) / (cardCount - 1), 0, 2) + 'vw / 10' :'0px'};|">
 
