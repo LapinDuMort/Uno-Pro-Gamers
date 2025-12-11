@@ -17,7 +17,7 @@ public class HomeController {
 
     // track whether game is over
     // i.e. is there a winner?
-    private boolean gameOver = false;
+    boolean gameOver = false;
 
     public HomeController() {
         Mygame = new Game();
