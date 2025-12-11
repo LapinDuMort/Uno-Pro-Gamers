@@ -34,6 +34,7 @@ public class Game {
                 cardDeck.shuffle();
             }
             player.addCardToHand(cardDeck.drawCard());
+            player.handSort();
         }
     }
 }

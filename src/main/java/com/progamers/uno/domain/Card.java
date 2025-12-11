@@ -6,4 +6,6 @@ public class Card {
     //For the card class, create the variables colour and value
     Colour colour;
     Value value;
+
 }
+
