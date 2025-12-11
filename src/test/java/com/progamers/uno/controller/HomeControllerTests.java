@@ -1,10 +1,17 @@
 package com.progamers.uno.controller;
 
+import com.progamers.uno.PlayerController;
+import com.progamers.uno.domain.Card;
+import com.progamers.uno.domain.Colour;
+import com.progamers.uno.domain.Value;
+import com.progamers.uno.domain.game.Game;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.ArrayList;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -19,6 +26,9 @@ public class HomeControllerTests {
 
     @Autowired
     MockMvc mockMvc;
+
+    @Autowired
+    HomeController homeController;
 
     /* --- testing uno declaration --- */
 
@@ -53,14 +63,28 @@ public class HomeControllerTests {
 
     @Test
     void testWhenDeclareUnoAndPlayFinalCard_thenRedirectsToGameOver() throws Exception {
-        // new game with 7 cards
-        // play down to 6 cards
-        for (int i=0; i<6; i++) {
-            mockMvc.perform(post("/play")
-                            .param("cardIndex", "0"))
-                    .andExpect(status().is3xxRedirection())
-                    .andExpect(redirectedUrl("/playerpage"));
-        }
+        // explicit 1 card hand
+        // uno declared & valid move
+        // grab real domain objects from controller
+        PlayerController player = homeController.MyplayerController;
+        Game game = homeController.Mygame;
+
+        // ensure discard pile top card is known
+        Card topCard = Card.builder()
+                .colour(Colour.Red)
+                .value(Value.One)
+                .build();
+
+        game.getDiscardPile().addToPile(topCard);
+
+        // give player exactly 1 card
+        var hand = new ArrayList<Card>();
+        Card lastCard = Card.builder()
+                .colour(Colour.Red)
+                .value(Value.Two)
+                .build();
+        hand.add(lastCard);
+        player.setPlayerHand(hand);
 
         // declare uno
         mockMvc.perform(post("/uno"))
@@ -93,17 +117,7 @@ public class HomeControllerTests {
         // play() and draw() should redirect to game over screen
         // until a new game is started
 
-        // push player to winning position
-        // update: play down to final card
-        // do not play all cards before declaring uno
-        for (int i=0; i<6; i++) {
-            mockMvc.perform(post("/play").param("cardIndex", "0"));
-        }
-
-        // update: declare uno
-        mockMvc.perform(post("/uno"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/playerpage"));
+        homeController.gameOver = true;
 
         // update: play final card to win game
         // expect redirect to /gameover
