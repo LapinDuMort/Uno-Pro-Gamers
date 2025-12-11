@@ -1,8 +1,6 @@
-package com.progamers.uno.domaintests;
+package com.progamers.uno.domain.game;
 
-import com.progamers.uno.PlayerController;
-import com.progamers.uno.domain.DiscardPile;
-import com.progamers.uno.domain.game.Game;
+import com.progamers.uno.domain.player.PlayerController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
