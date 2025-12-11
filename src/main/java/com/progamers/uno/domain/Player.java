@@ -16,6 +16,7 @@ public class Player {
     private int currentSelected;
 
     public Player() {
+        //Renamed to Player
         this.hasUno = false;
         this.playerHand = new ArrayList<Card>();
         this.currentSelected = 0;
