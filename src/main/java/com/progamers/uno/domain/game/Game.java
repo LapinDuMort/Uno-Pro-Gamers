@@ -9,7 +9,7 @@ import com.progamers.uno.domain.factory.StandardDeckFactory;
 public class Game {
 
     private final Deck cardDeck;
-    private DiscardPile discardPile;
+    private final DiscardPile discardPile;
 
     public Game() {
         DeckFactory deckFactory = new StandardDeckFactory();
