@@ -1,43 +1,79 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UNO Game</title>
-    <link rel="stylesheet" href="/css/globalstyle.css">
-    <link rel="stylesheet" href="/css/uno.css">
-</head>
-<body>
-
-<h1>UNO Game</h1>
-
-<div class="game-board">
-    <div class="pile">
-        <h2>Draw Pile</h2>
-        <div class="uno-card single">?</div>
-        <form th:action="@{/draw}" method="post">
-            <button class="draw-button">Draw Card</button>
-        </form>
-    </div>
-    <div class="pile">
-        <h2>Discard Pile</h2>
-        <div class="uno-card single"
-             th:text="${discardCard.value}"
-             th:style="'--card-colour:' + ${discardCard.colour}">
+    <!DOCTYPE html>
+    <html xmlns:th="http://www.thymeleaf.org" lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>UNO Game</title>
+        <link rel="stylesheet" href="/css/globalstyle.css">
+        <link rel="stylesheet" href="/css/uno.css">
+    </head>
+    <body>
+    <h1>UNO Game</h1>
+    <div class="game-board">
+        <div class="pile">
+            <h2>Draw Pile</h2>
+            <div class="uno-card single">?</div>
+            <form th:action="@{/draw}" method="post">
+                <button class="draw-button">Draw Card</button>
+            </form>
+        </div>
+        <div class="pile">
+            <h2>Discard Pile</h2>
+            <div class="uno-card single"
+                 th:style="|--card-colour:${#strings.equals(discardCard.colour, 'Wild') ? 'black' : discardCard.colour}|">
+                <div class="value" th:text="${discardCard.value}"></div>
+            </div>
         </div>
     </div>
-</div>
+    <h2>Your Hand</h2>
+    <div class="hand"
+         th:with="cardCount=${playerHand.size()}"
+         th:style="|--total-cards:${cardCount};
+             --spacing-unit: ${cardCount > 1 ?#numbers.formatDecimal( (90 * 10 - 110) / (cardCount - 1), 0, 2) + 'vw / 10' :'0px'};|">
 
-<h2>Your Hand</h2>
-
-<div class="hand"
-     th:with="cardCount=${playerHand.size()}"
-     th:style="|--total-cards:${cardCount};
-     --spacing-unit: ${cardCount > 1 ?#numbers.formatDecimal( (90 * 10 - 110) / (cardCount - 1), 0, 2) + 'vw / 10' :'0px'};|">
-    <div th:each="card, iter : ${playerHand}" class="uno-card"
-         th:style="'--card-colour:' + ${card.colour} + '; --i:' + ${iter.index}">
-        <div class="value" th:text="${card.value}"></div>
+        <form th:each="card, iter : ${playerHand}"
+              th:action="@{/play}"
+              method="post"
+              style="display:inline-block">
+            <input type="hidden" th:name="cardIndex" th:value="${iter.index}"/>
+            <button type="submit" class="uno-card"
+                    th:style="|--card-colour:${#strings.equals(card.colour, 'Wild') ? 'black' : card.colour}; --i:${iter.index}|">
+                <div class="value" th:text="${card.value}"></div>
+            </button>
+        </form>
+        </div>
     </div>
-</div>
-</body>
-</html>
+    </body>
+    </html>
+    <script>
+        // Mapping from card value string to number
+        const valueMap = {
+            "ZERO": 0,
+            "ONE": 1,
+            "TWO": 2,
+            "THREE": 3,
+            "FOUR": 4,
+            "FIVE": 5,
+            "SIX": 6,
+            "SEVEN": 7,
+            "EIGHT": 8,
+            "NINE": 9,
+            "SKIP": "⏭",
+        "REVERSE": "⟳",
+        "DRAWTWO": "+2",
+        "WILD": "★",
+        "WILDFOUR": "★+4"
+        };
+
+        // Function to replace card string with number
+        function convertCardValues(containerSelector) {
+            document.querySelectorAll(containerSelector).forEach(el => {
+                const text = el.textContent.trim().toUpperCase();
+                if (valueMap.hasOwnProperty(text)) {
+                    el.textContent = valueMap[text];
+                }
+            });
+        }
+        convertCardValues('.hand .uno-card .value');
+        convertCardValues('.pile .uno-card.single .value');
+    </script>
