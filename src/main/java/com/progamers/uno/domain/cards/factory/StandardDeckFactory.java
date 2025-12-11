@@ -1,9 +1,9 @@
-package com.progamers.uno.domain.factory;
+package com.progamers.uno.domain.cards.factory;
 
-import com.progamers.uno.domain.Card;
-import com.progamers.uno.domain.Colour;
-import com.progamers.uno.domain.Deck;
-import com.progamers.uno.domain.Value;
+import com.progamers.uno.domain.cards.Card;
+import com.progamers.uno.domain.cards.Colour;
+import com.progamers.uno.domain.cards.Deck;
+import com.progamers.uno.domain.cards.Value;
 
 import java.util.ArrayList;
 import java.util.List;
