@@ -46,7 +46,6 @@ public class HomeController {
     @PostMapping("/play")
     public RedirectView playCard(@RequestParam("cardIndex") int cardIndex, Model model) throws Exception {
 
-        Mygame.getDiscardPile().addToPile(MyplayerController.getCurrentSelectedCard(cardIndex));
         Mygame.getDiscardPile().addToPile(MyplayerController.playCard(cardIndex));
 
         model.addAttribute("playerHand", MyplayerController.getPlayerHand());
