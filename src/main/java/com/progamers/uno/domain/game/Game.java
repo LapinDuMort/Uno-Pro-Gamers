@@ -42,6 +42,7 @@ public class Game {
 
     //isValidMove compares value and colour to check move legality, and if selectedCard is a Wild type
     public boolean isValidMove(Card topCard, Card selectedCard){
+        if(topCard.getColour() == Colour.Wild)return true;
         if(topCard.getColour() == selectedCard.getColour()) {return true;}
         else if(topCard.getValue() == selectedCard.getValue()) {return true;}
         else if(selectedCard.getColour() == Colour.Wild) {return true;}
