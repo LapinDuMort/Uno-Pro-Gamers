@@ -1,6 +1,6 @@
 package com.progamers.uno;
 
-import com.progamers.uno.domain.Player;
+import com.progamers.uno.domain.player.Player;
 import com.progamers.uno.domain.cards.Card;
 import com.progamers.uno.domain.cards.Colour;
 import com.progamers.uno.domain.cards.Value;
