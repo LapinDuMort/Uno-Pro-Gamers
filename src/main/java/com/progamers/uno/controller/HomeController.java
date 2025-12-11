@@ -38,6 +38,8 @@ public class HomeController {
 
         model.addAttribute("playerHand", MyplayerController.getPlayerHand());
         model.addAttribute("discardCard", Mygame.getDiscardPile().getTopCard());
+        model.addAttribute("hasUno", MyplayerController.getHasUno());
+        model.addAttribute("gameOver", gameOver);
         return "UnoPlayerPage";
     }
 
@@ -65,6 +67,14 @@ public class HomeController {
 
 
         if(Mygame.isValidMove(Mygame.getDiscardPile().getTopCard(), MyplayerController.getCurrentSelectedCard(cardIndex))){
+            // penalty for not declaring uno
+            // player tries to play their final card while hasUno is false
+            if (MyplayerController.getHandSize() == 1 && !MyplayerController.getHasUno()) {
+                // draw 2 cards automatically instead of playing card
+                Mygame.drawCards(MyplayerController, 2);
+                // redirect to /playerpage
+                return new RedirectView("/playerpage");
+            }
             Mygame.getDiscardPile().addToPile(MyplayerController.playCard(cardIndex));
         }
 
@@ -78,6 +88,27 @@ public class HomeController {
 
         model.addAttribute("playerHand", MyplayerController.getPlayerHand());
         model.addAttribute("discardCard", Mygame.getDiscardPile().getTopCard());
+        return new RedirectView("/playerpage");
+    }
+
+    /**
+     * Endpoint to allow player to declare uno on their final card
+     * <p>
+     * Pre-requisite to player being allowed to win.
+     * If game is already over redirect to game-over view otherwise delegate to
+     * {@link com.progamers.uno.PlayerController#DeclareUno()} to update {@code hasUno}
+     * flag based on player's current hand size. Then redirect to player view to update
+     * uno status
+     * </p>
+     * @return redirect to player page or game-over page if game has ended
+     */
+    @PostMapping("/uno")
+    public RedirectView declareUno() {
+        // if game is over redirect game-over view
+        if (gameOver) { return new RedirectView("/gameover"); }
+        // let player decide if valid uno
+        MyplayerController.DeclareUno();
+        // return to player view to see uno status
         return new RedirectView("/playerpage");
     }
 
