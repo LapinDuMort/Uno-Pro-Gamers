@@ -63,7 +63,6 @@ public class HomeController {
             return new RedirectView("/gameover");
         }
 
-        Mygame.getDiscardPile().addToPile(MyplayerController.getCurrentSelectedCard(cardIndex));
         Mygame.getDiscardPile().addToPile(MyplayerController.playCard(cardIndex));
 
         // win condition
