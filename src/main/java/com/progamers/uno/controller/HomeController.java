@@ -63,7 +63,10 @@ public class HomeController {
             return new RedirectView("/gameover");
         }
 
-        Mygame.getDiscardPile().addToPile(MyplayerController.playCard(cardIndex));
+
+        if(Mygame.isValidMove(Mygame.getDiscardPile().getTopCard(), MyplayerController.getCurrentSelectedCard(cardIndex))){
+            Mygame.getDiscardPile().addToPile(MyplayerController.playCard(cardIndex));
+        }
 
         // win condition
         // if hand is empty
