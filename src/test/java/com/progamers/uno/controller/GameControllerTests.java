@@ -36,6 +36,7 @@ public class GameControllerTests {
 
         when(gameService.getPlayerHand()).thenReturn(hand);
         when(gameService.getTopDiscard()).thenReturn(topDiscard);
+        when(gameService.checkTopDiscardWild()).thenReturn("None");
         when(gameService.isGameOver()).thenReturn(false);
         when(gameService.hasUno()).thenReturn(false);
 
@@ -44,11 +45,13 @@ public class GameControllerTests {
                 .andExpect(view().name("UnoPlayerPage"))
                 .andExpect(model().attribute("playerHand", sameInstance(hand)))
                 .andExpect(model().attribute("discardCard", sameInstance(topDiscard)))
+                .andExpect(model().attribute("wildColour", is("None")))
                 .andExpect(model().attribute("gameOver", is(false)))
                 .andExpect(model().attribute("hasUno", is(false)));
 
         verify(gameService).getPlayerHand();
         verify(gameService).getTopDiscard();
+        verify(gameService).checkTopDiscardWild();
         verify(gameService).isGameOver();
         verify(gameService).hasUno();
         verifyNoMoreInteractions(gameService);
