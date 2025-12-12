@@ -31,6 +31,31 @@ public class GameControllerTests {
 
     /* --- POST /draw --- */
 
+    @Test
+    void testDraw_whenGameNotOver_thenDrawsCardAndRedirectsToPlayerPage() throws Exception {
+        when(gameService.isGameOver()).thenReturn(false);
+
+        mockMvc.perform(post("/draw"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/playerpage"));
+
+        verify(gameService).isGameOver();
+        verify(gameService).drawCard();
+        verifyNoMoreInteractions(gameService);
+    }
+
+    @Test
+    void testDraw_whenGameOver_thenRedirectsToGameOverAndDoesNotDraw() throws Exception {
+        when(gameService.isGameOver()).thenReturn(true);
+
+        mockMvc.perform(post("/draw"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/gameover"));
+
+        verify(gameService).isGameOver();
+        verifyNoMoreInteractions(gameService);
+    }
+
     /* --- POST /play --- */
 
     /* --- POST /uno --- */
