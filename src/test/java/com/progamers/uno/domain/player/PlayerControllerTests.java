@@ -1,19 +1,19 @@
-package com.progamers.uno;
+package com.progamers.uno.domain.player;
 
-import com.progamers.uno.domain.Card;
-import com.progamers.uno.domain.Colour;
-import com.progamers.uno.domain.Value;
+import com.progamers.uno.domain.cards.Card;
+import com.progamers.uno.domain.cards.Colour;
+import com.progamers.uno.domain.cards.Value;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class PlayerControllerTests {
-    PlayerController player;
+    Player player;
 
     @BeforeEach
     void setUp() {
-        player = new PlayerController();
+        player = new Player();
     }
 
     @Test
@@ -108,7 +108,7 @@ class PlayerControllerTests {
         Card cardRedFive = Card.builder().value(Value.Five).colour(Colour.Red).build();
         player.addCardToHand(cardRedFive);
 
-        player.DeclareUno();
+        player.declareUno();
 
         assertEquals(true, player.getHasUno());
     }
@@ -118,7 +118,7 @@ class PlayerControllerTests {
         Card cardRedFive = Card.builder().value(Value.Five).colour(Colour.Red).build();
         player.addCardToHand(cardRedFive);
 
-        player.DeclareUno();
+        player.declareUno();
 
         Card cardBlueFive = Card.builder().value(Value.Five).colour(Colour.Blue).build();
         player.addCardToHand(cardBlueFive);

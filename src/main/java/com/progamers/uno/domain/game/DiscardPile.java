@@ -1,4 +1,6 @@
-package com.progamers.uno.domain;
+package com.progamers.uno.domain.game;
+
+import com.progamers.uno.domain.cards.Card;
 
 import java.util.ArrayList;
 import java.util.List;

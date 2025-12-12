@@ -1,12 +1,11 @@
 package com.progamers.uno.domain.game;
 
-import com.progamers.uno.PlayerController;
-import com.progamers.uno.domain.Card;
-import com.progamers.uno.domain.Colour;
-import com.progamers.uno.domain.Deck;
-import com.progamers.uno.domain.DiscardPile;
-import com.progamers.uno.domain.factory.DeckFactory;
-import com.progamers.uno.domain.factory.StandardDeckFactory;
+import com.progamers.uno.domain.player.Player;
+import com.progamers.uno.domain.cards.Card;
+import com.progamers.uno.domain.cards.Colour;
+import com.progamers.uno.domain.cards.Deck;
+import com.progamers.uno.domain.cards.factory.DeckFactory;
+import com.progamers.uno.domain.cards.factory.StandardDeckFactory;
 
 public class Game {
 
@@ -25,7 +24,7 @@ public class Game {
         return this.discardPile;
     }
 
-    public void drawCards(PlayerController player, int numCards) {
+    public void drawCards(Player player, int numCards) {
         for (int i=0; i < numCards; i++) {
             //Check if deck empty
             //If deck empty, call DiscardPile.RefillDeck

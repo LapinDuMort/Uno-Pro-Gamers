@@ -1,12 +1,7 @@
-package com.progamers.uno.domaintests;
+package com.progamers.uno.domain.cards;
 
-import com.progamers.uno.domain.Card;
-
-import com.progamers.uno.domain.Colour;
-import com.progamers.uno.domain.Deck;
-import com.progamers.uno.domain.Value;
-import com.progamers.uno.domain.factory.DeckFactory;
-import com.progamers.uno.domain.factory.StandardDeckFactory;
+import com.progamers.uno.domain.cards.factory.DeckFactory;
+import com.progamers.uno.domain.cards.factory.StandardDeckFactory;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

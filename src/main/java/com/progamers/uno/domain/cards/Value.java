@@ -1,4 +1,4 @@
-package com.progamers.uno.domain;
+package com.progamers.uno.domain.cards;
 
 public enum Value {
     //Create an Enum (group of constant values) to represent the values a card can have including specials

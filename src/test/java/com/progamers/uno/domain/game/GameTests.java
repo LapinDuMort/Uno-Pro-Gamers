@@ -1,27 +1,24 @@
-package com.progamers.uno.domaintests;
+package com.progamers.uno.domain.game;
 
-import com.progamers.uno.PlayerController;
-import com.progamers.uno.domain.Card;
-import com.progamers.uno.domain.Colour;
-import com.progamers.uno.domain.Deck;
-import com.progamers.uno.domain.Value;
-import com.progamers.uno.domain.game.Game;
+import com.progamers.uno.domain.player.Player;
+import com.progamers.uno.domain.cards.Card;
+import com.progamers.uno.domain.cards.Colour;
+import com.progamers.uno.domain.cards.Deck;
+import com.progamers.uno.domain.cards.Value;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.awt.*;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class GameTests {
 
     Game game;
-    PlayerController player;
+    Player player;
 
     @BeforeEach
     void setup() {
         game = new Game();
-        player = new PlayerController();
+        player = new Player();
     }
 
     @Test
