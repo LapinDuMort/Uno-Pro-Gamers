@@ -19,6 +19,8 @@ public class GameService {
     private final Player player;
     private boolean gameOver;
     private boolean isReverse;
+    private int turnTracker;
+    private int numberOfPlayers;
 
     public GameService() {
         this.game = new Game();
@@ -29,6 +31,9 @@ public class GameService {
         this.player = new Player();
         this.game.drawCards(this.player, 7);
         this.isReverse = false;
+        this.turnTracker = 1;
+        //currently set to 1, but will adapt to game size later
+        this.numberOfPlayers = 1;
     }
 
     public List<Card> getPlayerHand() {
