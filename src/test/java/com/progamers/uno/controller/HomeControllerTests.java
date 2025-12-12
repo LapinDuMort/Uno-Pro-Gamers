@@ -1,8 +1,9 @@
 package com.progamers.uno.controller;
 
-import com.progamers.uno.PlayerController;
+
 import com.progamers.uno.domain.Card;
 import com.progamers.uno.domain.Colour;
+import com.progamers.uno.domain.Player;
 import com.progamers.uno.domain.Value;
 import com.progamers.uno.domain.game.Game;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(HomeController.class)
+@WebMvcTest(GameController.class)
 // we need to push game state into a service class
 // otherwise tests share the state of the controller causing flakiness
 // temp fix for now
@@ -28,7 +29,7 @@ public class HomeControllerTests {
     MockMvc mockMvc;
 
     @Autowired
-    HomeController homeController;
+    GameController homeController;
 
     /* --- testing uno declaration --- */
 
@@ -66,7 +67,7 @@ public class HomeControllerTests {
         // explicit 1 card hand
         // uno declared & valid move
         // grab real domain objects from controller
-        PlayerController player = homeController.MyplayerController;
+        Player player = homeController.MyplayerController;
         Game game = homeController.Mygame;
 
         // ensure discard pile top card is known
