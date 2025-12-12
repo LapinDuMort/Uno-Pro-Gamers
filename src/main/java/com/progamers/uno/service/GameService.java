@@ -26,7 +26,7 @@ public class GameService {
         this.game.getDiscardPile().addToPile(
                 this.game.getCardDeck().drawCard()
         );
-        this.player = new Player();
+        this.player = new Player(1);
         this.game.drawCards(this.player, 7);
         this.isReverse = false;
         this.turnTracker = 1;
