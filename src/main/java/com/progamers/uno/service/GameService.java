@@ -1,5 +1,6 @@
 package com.progamers.uno.service;
 
+import com.progamers.uno.domain.game.SpecialCards;
 import com.progamers.uno.domain.player.Player;
 import com.progamers.uno.domain.cards.Card;
 import com.progamers.uno.domain.game.Game;
@@ -17,6 +18,7 @@ public class GameService {
     private final Game game;
     private final Player player;
     private boolean gameOver;
+    private boolean isReverse;
 
     public GameService() {
         this.game = new Game();
@@ -26,6 +28,7 @@ public class GameService {
         );
         this.player = new Player();
         this.game.drawCards(this.player, 7);
+        this.isReverse = false;
     }
 
     public List<Card> getPlayerHand() {
@@ -80,11 +83,27 @@ public class GameService {
         }
 
         this.game.getDiscardPile().addToPile(
-                this.player.playCard(index)
-        );
+                this.player.playCard(index));
+
+        checkSpecialCard(selectedCard);
 
         if (this.player.getHandSize() == 0) {
             this.gameOver = true;
         }
+    }
+    public void checkSpecialCard(Card selectedCard) {
+        //checking for SpecialCards functions
+        if(SpecialCards.checkForDraw(selectedCard.getValue()) == 4){
+            this.game.drawCards(this.player, 4);
+            //TODO Increment turn order
+        }
+        else if (SpecialCards.checkForDraw(selectedCard.getValue()) == 2){
+            this.game.drawCards(this.player, 2);
+            //TODO Increment turn order
+        }
+        else if (SpecialCards.checkForSkip(selectedCard.getValue())){
+            //TODO Increment turn order
+        }
+        this.isReverse = SpecialCards.checkForReverse(selectedCard.getValue(), this.isReverse);
     }
 }
