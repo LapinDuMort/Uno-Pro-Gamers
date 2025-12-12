@@ -29,6 +29,31 @@ public class GameControllerTests {
 
     /* --- GET /playerpage --- */
 
+    @Test
+    void playerPage_rendersViewWithModelFromService() throws Exception {
+        List<Card> hand = Collections.emptyList();
+        var topDiscard = mock(Card.class);
+
+        when(gameService.getPlayerHand()).thenReturn(hand);
+        when(gameService.getTopDiscard()).thenReturn(topDiscard);
+        when(gameService.isGameOver()).thenReturn(false);
+        when(gameService.hasUno()).thenReturn(false);
+
+        mockMvc.perform(get("/playerpage"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("UnoPlayerPage"))
+                .andExpect(model().attribute("playerHand", sameInstance(hand)))
+                .andExpect(model().attribute("discardCard", sameInstance(topDiscard)))
+                .andExpect(model().attribute("gameOver", is(false)))
+                .andExpect(model().attribute("hasUno", is(false)));
+
+        verify(gameService).getPlayerHand();
+        verify(gameService).getTopDiscard();
+        verify(gameService).isGameOver();
+        verify(gameService).hasUno();
+        verifyNoMoreInteractions(gameService);
+    }
+
     /* --- POST /draw --- */
 
     @Test
