@@ -29,9 +29,104 @@ public class GameControllerTests {
 
     /* --- GET /playerpage --- */
 
+    @Test
+    void playerPage_rendersViewWithModelFromService() throws Exception {
+        List<Card> hand = Collections.emptyList();
+        var topDiscard = mock(Card.class);
+
+        when(gameService.getPlayerHand()).thenReturn(hand);
+        when(gameService.getTopDiscard()).thenReturn(topDiscard);
+        when(gameService.checkTopDiscardWild()).thenReturn("None");
+        when(gameService.isGameOver()).thenReturn(false);
+        when(gameService.hasUno()).thenReturn(false);
+
+        mockMvc.perform(get("/playerpage"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("UnoPlayerPage"))
+                .andExpect(model().attribute("playerHand", sameInstance(hand)))
+                .andExpect(model().attribute("discardCard", sameInstance(topDiscard)))
+                .andExpect(model().attribute("wildColour", is("None")))
+                .andExpect(model().attribute("gameOver", is(false)))
+                .andExpect(model().attribute("hasUno", is(false)));
+
+        verify(gameService).getPlayerHand();
+        verify(gameService).getTopDiscard();
+        verify(gameService).checkTopDiscardWild();
+        verify(gameService).isGameOver();
+        verify(gameService).hasUno();
+        verifyNoMoreInteractions(gameService);
+    }
+
     /* --- POST /draw --- */
 
+    @Test
+    void testDraw_whenGameNotOver_thenDrawsCardAndRedirectsToPlayerPage() throws Exception {
+        when(gameService.isGameOver()).thenReturn(false);
+
+        mockMvc.perform(post("/draw"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/playerpage"));
+
+        verify(gameService).isGameOver();
+        verify(gameService).drawCard();
+        verifyNoMoreInteractions(gameService);
+    }
+
+    @Test
+    void testDraw_whenGameOver_thenRedirectsToGameOverAndDoesNotDraw() throws Exception {
+        when(gameService.isGameOver()).thenReturn(true);
+
+        mockMvc.perform(post("/draw"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/gameover"));
+
+        verify(gameService).isGameOver();
+        verifyNoMoreInteractions(gameService);
+    }
+
     /* --- POST /play --- */
+
+    @Test
+    void testPlay_whenGameNotOver_thenPlayPlaysCardAndRedirectsToPlayerPage() throws Exception {
+        when(gameService.isGameOver()).thenReturn(false);
+
+        mockMvc.perform(post("/play")
+                .param("cardIndex", "0"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/playerpage"));
+
+        verify(gameService).playCard(0, null);
+        verify(gameService).isGameOver();
+        verifyNoMoreInteractions(gameService);
+    }
+
+    @Test
+    void testPlay_whenGameOver_thenPlayRedirectsToGameOverAndDoesNotPlayCard() throws Exception {
+        when(gameService.isGameOver()).thenReturn(true);
+
+        mockMvc.perform(post("/play").param("cardIndex", "0"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/gameover"));
+
+        verify(gameService).playCard(0, null);
+        verify(gameService).isGameOver();
+        verifyNoMoreInteractions(gameService);
+    }
+
+    @Test
+    void testPlay_whenWildCardPlayed_thenPlaysCardAndRedirectsToPlayerPage() throws Exception {
+        when(gameService.isGameOver()).thenReturn(false);
+
+        mockMvc.perform(post("/play")
+                        .param("cardIndex", "0")
+                        .param("wildoutput", "Blue"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/playerpage"));
+
+        verify(gameService).playCard(0, "Blue");
+        verify(gameService).isGameOver();
+        verifyNoMoreInteractions(gameService);
+    }
 
     /* --- POST /uno --- */
 
