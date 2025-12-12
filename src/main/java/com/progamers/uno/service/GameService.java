@@ -7,6 +7,7 @@ import com.progamers.uno.domain.game.Game;
 import lombok.Getter;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -19,6 +20,7 @@ public class GameService {
     private boolean isReverse;
     private int turnTracker;
     private int numberOfPlayers;
+    private List<Player> playerList;
 
     public GameService() {
         this.game = new Game();
@@ -32,6 +34,20 @@ public class GameService {
         this.turnTracker = 1;
         //currently set to 1, but will adapt to game size later
         this.numberOfPlayers = 1;
+        this.playerList = new ArrayList<>();
+    }
+
+    public void addPlayers(Player player){
+        this.playerList.add(player);
+    }
+
+    public Player whoseTurn(){
+        for(Player player : this.playerList){
+            if(this.turnTracker == player.getPlayerNumber()){
+                return player;
+            }
+        }
+        return null;
     }
 
     public List<Card> getPlayerHand() {
