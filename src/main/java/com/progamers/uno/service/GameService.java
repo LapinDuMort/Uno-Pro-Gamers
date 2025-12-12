@@ -39,7 +39,7 @@ public class GameService {
     }
 
     public void declareUno() {
-        this.player.DeclareUno();
+        this.player.declareUno();
     }
 
     public void drawCard() {
