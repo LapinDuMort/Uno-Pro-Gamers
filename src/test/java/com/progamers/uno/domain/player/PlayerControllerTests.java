@@ -108,7 +108,7 @@ class PlayerControllerTests {
         Card cardRedFive = Card.builder().value(Value.Five).colour(Colour.Red).build();
         player.addCardToHand(cardRedFive);
 
-        player.DeclareUno();
+        player.declareUno();
 
         assertEquals(true, player.getHasUno());
     }
@@ -118,7 +118,7 @@ class PlayerControllerTests {
         Card cardRedFive = Card.builder().value(Value.Five).colour(Colour.Red).build();
         player.addCardToHand(cardRedFive);
 
-        player.DeclareUno();
+        player.declareUno();
 
         Card cardBlueFive = Card.builder().value(Value.Five).colour(Colour.Blue).build();
         player.addCardToHand(cardBlueFive);
