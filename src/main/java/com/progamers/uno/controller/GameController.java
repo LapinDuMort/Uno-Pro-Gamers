@@ -45,11 +45,15 @@ public class GameController {
         gameService.drawCard();
         return new RedirectView("/playerpage");
     }
-    @PostMapping("/play")
-    public RedirectView playCard(@RequestParam("cardIndex") int cardIndex,
-                                 @RequestParam(value = "wildoutput", required = false) String wildColor, Model model) throws Exception {
 
-        gameService.playCard(cardIndex,wildColor);
+    @PostMapping("/play")
+    public RedirectView playCard(
+            @RequestParam("cardIndex") int cardIndex,
+            @RequestParam(value = "wildoutput", required = false) String wildColor,
+            Model model)
+            throws Exception
+    {
+        gameService.playCard(cardIndex, wildColor);
         return new RedirectView(
                 gameService.isGameOver() ? "/gameover" : "/playerpage"
         );
