@@ -69,6 +69,7 @@ public class GameService {
     public void drawCard() {
         if (gameOver) return;
         this.game.drawCards(this.player, 1);
+        this.turnTracker = this.game.incrementTurn(this.turnTracker, this.numberOfPlayers, this.isReverse);
     }
 
     public void playCard(int index) throws Exception {
@@ -87,6 +88,8 @@ public class GameService {
         this.game.getDiscardPile().addToPile(
                 this.player.playCard(index));
 
+        this.turnTracker = this.game.incrementTurn(this.turnTracker, this.numberOfPlayers, this.isReverse);
+
         checkSpecialCard(selectedCard);
 
         if (this.player.getHandSize() == 0) {
@@ -97,14 +100,14 @@ public class GameService {
         //checking for SpecialCards functions
         if(SpecialCards.checkForDraw(selectedCard.getValue()) == 4){
             this.game.drawCards(this.player, 4);
-            //TODO Increment turn order
+            this.turnTracker = this.game.incrementTurn(this.turnTracker, this.numberOfPlayers, this.isReverse);
         }
         else if (SpecialCards.checkForDraw(selectedCard.getValue()) == 2){
             this.game.drawCards(this.player, 2);
-            //TODO Increment turn order
+            this.turnTracker = this.game.incrementTurn(this.turnTracker, this.numberOfPlayers, this.isReverse);
         }
         else if (SpecialCards.checkForSkip(selectedCard.getValue())){
-            //TODO Increment turn order
+            this.turnTracker = this.game.incrementTurn(this.turnTracker, this.numberOfPlayers, this.isReverse);
         }
         this.isReverse = SpecialCards.checkForReverse(selectedCard.getValue(), this.isReverse);
     }
