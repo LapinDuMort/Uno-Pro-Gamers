@@ -12,7 +12,8 @@ public class SpecialCards {
             return playableColour;
         }
         return playableColour;}
-    public int checkForDraw(Value playableValue, Player targetPlayer) {
+
+    public static int checkForDraw(Value playableValue) {
         //Adds 4 cards to player on WildFour
         if (playableValue == Value.WildFour) {
             return 4;
@@ -23,14 +24,13 @@ public class SpecialCards {
         }
         return 0;
     }
-    public int checkForSkip(int playerTurn, Value playableValue){
+    public static boolean checkForSkip(Value playableValue){
         if(playableValue == Value.Skip){
-            //may need to add a decrement if reverse is true
-            return playerTurn++;
+            return true;
         }
-        return playerTurn;
+        return false;
     }
-    public boolean checkForReverse(Value playableValue, boolean isReverse){
+    public static boolean checkForReverse(Value playableValue, boolean isReverse){
         if(playableValue == Value.Reverse){
             if(isReverse){return false;}
             else{return true;}
