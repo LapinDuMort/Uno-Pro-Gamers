@@ -5,8 +5,10 @@ import com.progamers.uno.domain.cards.Card;
 import com.progamers.uno.domain.game.Game;
 import lombok.Getter;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Getter
@@ -47,12 +49,22 @@ public class GameService {
         this.game.drawCards(this.player, 1);
     }
 
-    public void playWildCard(int index, String WildColor) throws Exception {
 
-        playCard(index);
-        this.game.getDiscardPile().setWildColour(WildColor);
+    public String checkTopDiscardWild() {
 
+        if(getGame().getDiscardPile().WildColour != null){
+            return getGame().getDiscardPile().WildColour;
+        }
+        return "None";
     }
+
+    public void playCard(int index, String WildColor) throws Exception {
+        playCard(index);
+        if(WildColor != null) {
+            this.game.getDiscardPile().setWildColour(WildColor);
+        }
+    }
+
 
     public void playCard(int index) throws Exception {
         if (gameOver) return;
