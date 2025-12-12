@@ -86,6 +86,48 @@ public class GameControllerTests {
 
     /* --- POST /play --- */
 
+    @Test
+    void testPlay_whenGameNotOver_thenPlayPlaysCardAndRedirectsToPlayerPage() throws Exception {
+        when(gameService.isGameOver()).thenReturn(false);
+
+        mockMvc.perform(post("/play")
+                .param("cardIndex", "0"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/playerpage"));
+
+        verify(gameService).playCard(0, null);
+        verify(gameService).isGameOver();
+        verifyNoMoreInteractions(gameService);
+    }
+
+    @Test
+    void testPlay_whenGameOver_thenPlayRedirectsToGameOverAndDoesNotPlayCard() throws Exception {
+        when(gameService.isGameOver()).thenReturn(true);
+
+        mockMvc.perform(post("/play").param("cardIndex", "0"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/gameover"));
+
+        verify(gameService).playCard(0, null);
+        verify(gameService).isGameOver();
+        verifyNoMoreInteractions(gameService);
+    }
+
+    @Test
+    void testPlay_whenWildCardPlayed_thenPlaysCardAndRedirectsToPlayerPage() throws Exception {
+        when(gameService.isGameOver()).thenReturn(false);
+
+        mockMvc.perform(post("/play")
+                        .param("cardIndex", "0")
+                        .param("wildoutput", "Blue"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/playerpage"));
+
+        verify(gameService).playCard(0, "Blue");
+        verify(gameService).isGameOver();
+        verifyNoMoreInteractions(gameService);
+    }
+
     /* --- POST /uno --- */
 
     @Test
