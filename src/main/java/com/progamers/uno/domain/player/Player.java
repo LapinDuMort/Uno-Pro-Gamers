@@ -64,7 +64,7 @@ public class Player {
         }
     }
 
-    public void DeclareUno() {
+    public void declareUno() {
         // Implementation for declaring UNO
         if (playerHand.size() == 1)
         {
