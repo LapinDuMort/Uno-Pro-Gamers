@@ -31,6 +31,13 @@ public class GameController {
     public String viewPlayer(Model model) {
         model.addAttribute("playerHand", gameService.getPlayerHand());
         model.addAttribute("discardCard", gameService.getTopDiscard());
+        if(gameService.getGame().getDiscardPile().WildColour != null){
+
+            model.addAttribute("wildColour", gameService.getGame().getDiscardPile().WildColour);
+        } else {
+            model.addAttribute("wildColour", "None");
+        }
+
         model.addAttribute("gameOver", gameService.isGameOver());
         model.addAttribute("hasUno", gameService.hasUno());
         return "UnoPlayerPage";
@@ -44,10 +51,18 @@ public class GameController {
         gameService.drawCard();
         return new RedirectView("/playerpage");
     }
-
     @PostMapping("/play")
-    public RedirectView playCard(@RequestParam("cardIndex") int cardIndex, Model model) throws Exception {
-        gameService.playCard(cardIndex);
+    public RedirectView playCard(@RequestParam("cardIndex") int cardIndex,
+                                 @RequestParam(value = "wildoutput", required = false) String wildColor, Model model) throws Exception {
+
+        if (wildColor != null) {
+            // Wild card played: use the chosen color
+            gameService.playWildCard(cardIndex, wildColor);
+        } else {
+            // Normal card
+            gameService.playCard(cardIndex);
+        }
+
         return new RedirectView(
                 gameService.isGameOver() ? "/gameover" : "/playerpage"
         );

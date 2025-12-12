@@ -47,6 +47,13 @@ public class GameService {
         this.game.drawCards(this.player, 1);
     }
 
+    public void playWildCard(int index, String WildColor) throws Exception {
+
+        playCard(index);
+        this.game.getDiscardPile().setWildColour(WildColor);
+
+    }
+
     public void playCard(int index) throws Exception {
         if (gameOver) return;
 

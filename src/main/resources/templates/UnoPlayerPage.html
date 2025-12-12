@@ -20,7 +20,7 @@
         <div class="pile">
             <h2>Discard Pile</h2>
             <div class="uno-card single"
-                 th:style="|--card-colour:${#strings.equals(discardCard.colour, 'Wild') ? 'black' : discardCard.colour}|">
+                 th:style="|--card-colour:${#strings.equals(discardCard.colour, 'Wild') ? wildColour : discardCard.colour}|">
                 <div class="value" th:text="${discardCard.value}"></div>
             </div>
         </div>
@@ -34,17 +34,21 @@
              --spacing-unit: ${cardCount > 1 ?#numbers.formatDecimal( (90 * 10 - 110) / (cardCount - 1), 0, 2) + 'vw / 10' :'0px'};|">
 
         <form th:each="card, iter : ${playerHand}"
+              th:id="'playForm' + ${iter.index}"
               th:action="@{/play}"
               method="post"
               style="display:inline-block">
-            <input type="hidden" th:name="cardIndex" th:value="${iter.index}"/>
-            <button type="submit" class="uno-card"
+
+            <input type="hidden" name="cardIndex" th:value="${iter.index}" />
+            <button type="button"
+                    class="uno-card"
+                    th:attr="data-index=${iter.index}, data-colour=${card.colour.name()}"
+                    th:onclick="|playCard(this)|"
                     th:style="|--card-colour:${#strings.equals(card.colour, 'Wild') ? 'black' : card.colour}; --i:${iter.index}|">
                 <div class="value" th:text="${card.value}"></div>
             </button>
         </form>
         </div>
-    </div>
 
     <!-- UNO declaration controls -->
     <div class="uno-controls">
@@ -58,8 +62,53 @@
         </form>
     </div>
 
-    </body>
-    </html>
+    <!-- Wild card color picker popup -->
+    <div id="colorPicker" class="color-popup" style="display:none;">
+        <h3>Pick a Color</h3>
+        <form id="wildForm" th:action="@{/play}" method="post">
+            <input type="hidden" name="cardIndex" id="wildCardIndex">
+            <input type="hidden" name="wildoutput" id="wildColor">
+            <button type="button" onclick="chooseColor('Red')">Red</button>
+            <button type="button" onclick="chooseColor('Yellow')">Yellow</button>
+            <button type="button" onclick="chooseColor('Green')">Green</button>
+            <button type="button" onclick="chooseColor('Blue')">Blue</button>
+        </form>
+    </div>
+
+    <script>
+        function playCard(button) {
+            const index = button.dataset.index;
+            const colour = button.dataset.colour;
+
+            if (colour.toUpperCase() === 'WILD') {
+                window.tempCardIndex = index;
+                document.getElementById("colorPicker").style.display = "block";
+                return;
+            }
+
+            // Normal card → submit the form
+            const form = document.getElementById("playForm" + index);
+            if (form) form.submit();
+        }
+
+        function chooseColor(color) {
+            // Hide popup
+            document.getElementById("colorPicker").style.display = "none";
+
+            const indexInput = document.getElementById("wildCardIndex");
+            const colorInput = document.getElementById("wildColor");
+
+            if (!indexInput || !colorInput) {
+                console.error("Hidden form inputs not found!");
+                return;
+            }
+
+            indexInput.value = window.tempCardIndex;
+            colorInput.value = color;
+
+            document.getElementById("wildForm").submit();
+        }
+    </script>
     <script>
         // Mapping from card value string to number
         const valueMap = {
@@ -92,3 +141,6 @@
         convertCardValues('.hand .uno-card .value');
         convertCardValues('.pile .uno-card.single .value');
     </script>
+
+    </body>
+    </html>
