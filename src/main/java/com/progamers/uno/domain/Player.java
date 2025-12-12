@@ -1,5 +1,8 @@
 package com.progamers.uno.domain;
 
+import com.progamers.uno.domain.cards.Card;
+import com.progamers.uno.domain.cards.Colour;
+import com.progamers.uno.domain.cards.Value;
 import lombok.Getter;
 import lombok.Setter;
 
