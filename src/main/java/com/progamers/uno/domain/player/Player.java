@@ -18,12 +18,14 @@ public class Player {
     private List<Card> playerHand;
     private int currentSelected;
     private int playerNumber;
+    private String playerName;
 
-    public Player(int playerNumber) {
+    public Player(int playerNumber, String playerName) {
         this.hasUno = false;
         this.playerHand = new ArrayList<Card>();
         this.currentSelected = 0;
         this.playerNumber = playerNumber;
+        this.playerName = playerName;
     }
     public Card getCurrentSelectedCard(int index) throws Exception {
         // Check if the player's hand is empty
