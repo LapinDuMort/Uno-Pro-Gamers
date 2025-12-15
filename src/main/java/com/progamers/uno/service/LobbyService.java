@@ -49,7 +49,7 @@ public class LobbyService {
      * @throws LobbyException if lobby is already open or in-progress
      * @throws LobbyFullException if lobby full
      */
-    public synchronized LobbySnapshot joinLobby(String token, String playerId, String sessionId) {
+    public synchronized LobbySnapshot joinLobby(String token, String playerId, String playerName, String sessionId) {
         validateToken(token);
 
         if (this.session.getLobbyState() != LobbyState.OPEN) {
@@ -62,7 +62,7 @@ public class LobbyService {
             throw new LobbyFullException();
         }
 
-        this.session.putPlayerIfAbsent(playerId, sessionId);
+        this.session.putPlayerIfAbsent(playerId, playerName, sessionId);
 
         return snapshot();
     }
@@ -74,6 +74,27 @@ public class LobbyService {
                 this.session.getPlayerIdsInOrder(),
                 this.session.hasToken()
         );
+    }
+
+    public synchronized LobbySnapshot getLobbyStatus() { return snapshot(); }
+
+    public synchronized LobbySnapshot startGame(String token) {
+        validateToken(token);
+
+        if (this.session.getLobbyState() != LobbyState.OPEN) {
+            throw new LobbyException("Lobby is not open");
+        }
+        if (!Objects.equals(session.getActiveToken(), token)) {
+            throw new InvalidTokenException();
+        }
+        if (session.playerCount() < 2) {
+            throw new LobbyException("Need at least 2 players to start.");
+        }
+
+        this.session.setActiveToken(null);
+        this.session.setLobbyState(LobbyState.IN_PROGRESS);
+
+        return snapshot();
     }
 
     private void validateToken(String token) {
