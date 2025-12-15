@@ -51,12 +51,17 @@ public class GameService {
         }
     }
 
-    public void playerSelect(){
-        //TODO put in place to check number is between 2 and 8
+    public void playerSelect() {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Select number of players (2-8)");
-        int playersInGame = scanner.nextInt();
-        for(int i = 1; i <= playersInGame; i++){
+        int playersInGame;
+        while (true) {
+            System.out.println("Select number of players (2-8)");
+            playersInGame = scanner.nextInt();
+            if (playersInGame >= 2 && playersInGame <= 8) {
+                break;
+            }
+        }
+        for (int i = 1; i <= playersInGame; i++) {
             Scanner nameScanner = new Scanner(System.in);
             System.out.println("Enter player " + (i) + "'s name:");
             String playerName = nameScanner.next();
