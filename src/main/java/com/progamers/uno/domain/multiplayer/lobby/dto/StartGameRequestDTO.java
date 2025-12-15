@@ -15,4 +15,5 @@ public class StartGameRequestDTO {
      * playerId of player requesting to start game
      */
     private String playerId;
+    private String token;
 }
