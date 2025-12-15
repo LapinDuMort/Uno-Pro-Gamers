@@ -108,7 +108,20 @@ public class GameService {
         this.turnTracker = this.game.incrementTurn(this.turnTracker, this.numberOfPlayers, this.isReverse);
         whoseTurn();
     }
+    public String checkTopDiscardWild() {
 
+        if(getGame().getDiscardPile().WildColour != null){
+            return getGame().getDiscardPile().WildColour;
+        }
+        return "None";
+    }
+
+    public void playCard(int index, String WildColor) throws Exception {
+        playCard(index);
+        if(WildColor != null) {
+            this.game.getDiscardPile().setWildColour(WildColor);
+        }
+    }
     public void playCard(int index) throws Exception {
         if (gameOver) return;
 
