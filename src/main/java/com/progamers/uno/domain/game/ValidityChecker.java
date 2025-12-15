@@ -7,19 +7,26 @@ import com.progamers.uno.domain.cards.Value;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.Scanner;
+
 public class ValidityChecker {
     public static boolean isValid(Card topCard, Card selectedCard) {
         Colour playableColour = topCard.getColour();
         Value playableValue = topCard.getValue();
         if(playableColour == Colour.Wild) {
-            playableColour = pickColour(1);
+            playableColour = pickColour(userInputColour());
         }
         if(playableColour == selectedCard.getColour()) {return true;}
         else if(playableValue == selectedCard.getValue()) {return true;}
         else if(selectedCard.getColour() == Colour.Wild) {return true;}
         return false;
 }
-
+public static int userInputColour(){
+        Scanner userInputColour = new Scanner(System.in);
+        int number = userInputColour.nextInt();
+        userInputColour.close();
+        return number;
+}
 public static Colour pickColour(int userChoice) {
         if (userChoice == 1){return Colour.Red;}
         else if (userChoice == 2){return Colour.Blue;}
