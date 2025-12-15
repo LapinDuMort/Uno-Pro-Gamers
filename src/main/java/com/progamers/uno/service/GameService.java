@@ -6,9 +6,11 @@ import com.progamers.uno.domain.cards.Card;
 import com.progamers.uno.domain.game.Game;
 import lombok.Getter;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 @Service
@@ -108,6 +110,8 @@ public class GameService {
         this.turnTracker = this.game.incrementTurn(this.turnTracker, this.numberOfPlayers, this.isReverse);
         whoseTurn();
     }
+
+
     public String checkTopDiscardWild() {
 
         if(getGame().getDiscardPile().WildColour != null){
@@ -122,6 +126,8 @@ public class GameService {
             this.game.getDiscardPile().setWildColour(WildColor);
         }
     }
+
+
     public void playCard(int index) throws Exception {
         if (gameOver) return;
 
