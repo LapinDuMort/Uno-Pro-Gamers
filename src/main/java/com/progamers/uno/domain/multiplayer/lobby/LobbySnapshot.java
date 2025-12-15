@@ -17,6 +17,6 @@ import java.util.List;
 public class LobbySnapshot {
     private final LobbyState lobbyState;
     private final int maxPlayers;
-    private final List<String> playerIds;
+    private final List<String> playerNames;
     private final boolean tokenPresent;
 }
