@@ -14,7 +14,7 @@ class PlayerTests {
 
     @BeforeEach
     void setUp() {
-        player = new Player(1, "test");
+        player = new Player(1, "test", false);
     }
 
     @Test
@@ -109,7 +109,7 @@ class PlayerTests {
         Card cardRedFive = Card.builder().value(Value.Five).colour(Colour.Red).build();
         player.addCardToHand(cardRedFive);
 
-        player.DeclareUno();
+        player.declareUno();
 
         assertEquals(true, player.getHasUno());
     }
@@ -119,7 +119,7 @@ class PlayerTests {
         Card cardRedFive = Card.builder().value(Value.Five).colour(Colour.Red).build();
         player.addCardToHand(cardRedFive);
 
-        player.DeclareUno();
+        player.declareUno();
 
         Card cardBlueFive = Card.builder().value(Value.Five).colour(Colour.Blue).build();
         player.addCardToHand(cardBlueFive);
