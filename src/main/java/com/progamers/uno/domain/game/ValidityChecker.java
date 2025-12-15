@@ -5,6 +5,9 @@ import com.progamers.uno.domain.cards.Card;
 import com.progamers.uno.domain.cards.Colour;
 import com.progamers.uno.domain.cards.Value;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ValidityChecker {
     public static boolean isValid(Card topCard, Card selectedCard) {
         Colour playableColour = topCard.getColour();
@@ -26,4 +29,13 @@ public static Colour pickColour(int userChoice) {
         else {System.out.println("Invalid colour");}
         return Colour.Wild;
 }
+    public static List<Card> validCardList(List<Card> currentHand, Card topCard){
+        List<Card> validCards = new ArrayList<>();
+        for (Card card : currentHand){
+            if (isValid(topCard, card)){
+                validCards.add(card);
+            }
+        }
+        return validCards;
+    }
 }
