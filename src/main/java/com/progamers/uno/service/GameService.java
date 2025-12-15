@@ -53,17 +53,37 @@ public class GameService {
         Scanner scanner = new Scanner(System.in);
         int playersInGame;
         while (true) {
-            System.out.println("Select number of players (2-8)");
+            System.out.println("Select number of players (2-8): ");
             playersInGame = scanner.nextInt();
             if (playersInGame >= 2 && playersInGame <= 8) {
                 break;
             }
         }
         for (int i = 1; i <= playersInGame; i++) {
-            Scanner nameScanner = new Scanner(System.in);
-            System.out.println("Enter player " + (i) + "'s name:");
-            String playerName = nameScanner.next();
-            Player player = new Player(i, playerName);
+            boolean isBot;
+            while(true){
+                Scanner botScanner = new Scanner(System.in);
+                System.out.println("Is this player a bot? (y/n): ");
+                String createBotPlayer = botScanner.next();
+                if (createBotPlayer.equalsIgnoreCase("y")){
+                    isBot = true;
+                    break;
+                }
+                else if(createBotPlayer.equalsIgnoreCase("n")){
+                    isBot = false;
+                    break;
+                }
+            }
+            String playerName;
+            if (!isBot){
+                Scanner nameScanner = new Scanner(System.in);
+                System.out.println("Enter player " + (i) + "'s name: ");
+                playerName = nameScanner.next();
+            }
+            else{
+                playerName = "Bot " + i;
+            }
+            Player player = new Player(i, playerName, isBot);
             addPlayers(player);
         }
         this.numberOfPlayers = playersInGame;

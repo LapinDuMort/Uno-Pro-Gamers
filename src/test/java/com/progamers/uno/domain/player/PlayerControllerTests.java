@@ -13,7 +13,7 @@ class PlayerControllerTests {
 
     @BeforeEach
     void setUp() {
-        player = new Player(1);
+        player = new Player(1, "test");
     }
 
     @Test
