@@ -2,7 +2,6 @@ package com.progamers.uno.domain.game;
 
 import com.progamers.uno.domain.player.Player;
 import com.progamers.uno.domain.cards.Card;
-import com.progamers.uno.domain.cards.Colour;
 import com.progamers.uno.domain.cards.Deck;
 import com.progamers.uno.domain.cards.factory.DeckFactory;
 import com.progamers.uno.domain.cards.factory.StandardDeckFactory;
@@ -41,16 +40,6 @@ public class Game {
 
     //isValidMove compares value and colour to check move legality, and if selectedCard is a Wild type
     public boolean isValidMove(Card topCard, Card selectedCard){
-        if(topCard.getColour() == Colour.Wild)
-        {
-            if (!"None".equals(this.discardPile.WildColour) &&
-                    this.discardPile.WildColour.equals(selectedCard.getColour().toString())) {
-                return true;
-            }
-        }
-        if(topCard.getColour() == selectedCard.getColour()) {return true;}
-        else if(topCard.getValue() == selectedCard.getValue()) {return true;}
-        else if(selectedCard.getColour() == Colour.Wild) {return true;}
-        return false;
+        return ValidityChecker.isValid(topCard, selectedCard);
     }
 }
