@@ -44,6 +44,7 @@ public class GameService {
         this.playerList.add(this.playerOne);
         this.playerList.add(this.playerTwo);
         whoseTurn();
+        dealStartingHands();
     }
 
     public void addPlayers(Player player){
