@@ -60,30 +60,12 @@ public class GameService {
             }
         }
         for (int i = 1; i <= playersInGame; i++) {
-            boolean isBot;
-            while(true){
-                Scanner botScanner = new Scanner(System.in);
-                System.out.println("Is this player a bot? (y/n): ");
-                String createBotPlayer = botScanner.next();
-                if (createBotPlayer.equalsIgnoreCase("y")){
-                    isBot = true;
-                    break;
-                }
-                else if(createBotPlayer.equalsIgnoreCase("n")){
-                    isBot = false;
-                    break;
-                }
-            }
+
             String playerName;
-            if (!isBot){
-                Scanner nameScanner = new Scanner(System.in);
-                System.out.println("Enter player " + (i) + "'s name: ");
-                playerName = nameScanner.next();
-            }
-            else{
-                playerName = "Bot " + i;
-            }
-            Player player = new Player(i, playerName, isBot);
+            Scanner nameScanner = new Scanner(System.in);
+            System.out.println("Enter player " + (i) + "'s name: ");
+            playerName = nameScanner.next();
+            Player player = new Player(i, playerName);
             addPlayers(player);
         }
         whoseTurn();

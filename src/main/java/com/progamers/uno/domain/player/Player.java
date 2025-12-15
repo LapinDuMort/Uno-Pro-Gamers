@@ -19,15 +19,13 @@ public class Player {
     private int currentSelected;
     private int playerNumber;
     private String playerName;
-    private boolean isBot;
 
-    public Player(int playerNumber, String playerName, boolean isBot) {
+    public Player(int playerNumber, String playerName) {
         this.hasUno = false;
         this.playerHand = new ArrayList<Card>();
         this.currentSelected = 0;
         this.playerNumber = playerNumber;
         this.playerName = playerName;
-        this.isBot = isBot;
     }
     public Card getCurrentSelectedCard(int index) throws Exception {
         // Check if the player's hand is empty
