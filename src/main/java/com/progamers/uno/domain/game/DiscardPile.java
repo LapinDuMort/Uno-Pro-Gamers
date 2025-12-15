@@ -6,10 +6,20 @@ import java.util.List;
 
 public class DiscardPile {
     List<Card> playedCards;
+    public String WildColour;
+
 
     public DiscardPile(){
         this.playedCards  = new ArrayList<Card>();
     }
+
+    public void setWildColour(String colour) throws Exception {
+        if (!colour.equals("Red") && !colour.equals("Green") && !colour.equals("Blue") && !colour.equals("Yellow")){
+            throw new Exception("Invalid Colour Chosen for Wild Card");
+        }
+        this.WildColour = colour;
+    }
+
     public void addToPile(Card card){
         this.playedCards.add(card);
     }
