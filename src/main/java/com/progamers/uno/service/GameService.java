@@ -88,6 +88,7 @@ public class GameService {
             Player player = new Player(i, playerName, isBot);
             addPlayers(player);
         }
+        whoseTurn();
         this.numberOfPlayers = playersInGame;
     }
 
@@ -117,6 +118,7 @@ public class GameService {
         if (gameOver) return;
         this.game.drawCards(this.activePlayer, 1);
         this.turnTracker = this.game.incrementTurn(this.turnTracker, this.numberOfPlayers, this.isReverse);
+        whoseTurn();
     }
 
 
@@ -153,6 +155,7 @@ public class GameService {
                 this.activePlayer.playCard(index));
 
         this.turnTracker = this.game.incrementTurn(this.turnTracker, this.numberOfPlayers, this.isReverse);
+        whoseTurn();
 
         checkSpecialCard(selectedCard);
 
