@@ -22,6 +22,8 @@ public class GameService {
     private int numberOfPlayers;
     private List<Player> playerList;
     private Player activePlayer;
+    private Player playerOne;
+    private Player playerTwo;
 
     public GameService() {
         this.game = new Game();
@@ -35,6 +37,11 @@ public class GameService {
         //currently set to 1, but will adapt to game size later
         this.numberOfPlayers = 1;
         this.playerList = new ArrayList<>();
+        this.playerOne = new Player(1, "test1");
+        this.playerTwo = new Player(2, "test2");
+        this.playerList.add(this.playerOne);
+        this.playerList.add(this.playerTwo);
+        whoseTurn();
     }
 
     public void addPlayers(Player player){
