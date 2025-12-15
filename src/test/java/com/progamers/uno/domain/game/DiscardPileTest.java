@@ -14,7 +14,7 @@ public class DiscardPileTest {
     @BeforeEach
     void setup(){
         game = new Game();
-        player = new Player(1);
+        player = new Player(1, "test");
         testDiscardPile = new DiscardPile();
     }
 
