@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>UNO Lobby Test</title>
+</head>
+<body>
+
+<h3>UNO Lobby WebSocket Test</h3>
+
+<div>
+    Token (UUID):
+    <input id="token" size="40">
+    <button id="genToken">Generate</button>
+</div>
+
+<div>
+    Player ID:
+    <input id="playerId" value="p1">
+</div>
+
+<div style="margin-top: 8px;">
+    <button id="connectBtn">Connect</button>
+    <button id="openBtn">Open Lobby</button>
+    <button id="joinBtn">Join Lobby</button>
+</div>
+
+<pre id="log"
+     style="margin-top:12px;border:1px solid #ccc;padding:10px;height:240px;overflow:auto;">
+</pre>
+
+<!-- SockJS + STOMP (dev-only) -->
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+<!-- Your JS -->
+<script src="js/lobby.js"></script>
+
+</body>
+</html>
