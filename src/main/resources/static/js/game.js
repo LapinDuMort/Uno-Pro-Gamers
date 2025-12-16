@@ -56,7 +56,11 @@ function renderHand(hand) {
       // Heuristic: if card has value/type like "WILD" or "WILD_DRAW_FOUR"
       const text = JSON.stringify(card).toUpperCase();
       if (text.includes("WILD")) {
-        wildColor = prompt("Choose wild colour (e.g., RED, GREEN, BLUE, YELLOW):", "RED") || null;
+        const input = prompt("Choose wild colour:\n(Red, Blue, Green, Yellow):", "Red");
+        if (input) {
+          // Capitalize first letter: red -> Red, RED -> Red, etc.
+          wildColor = input.charAt(0).toUpperCase() + input.slice(1).toLowerCase();
+        }
       }
 
       playCard(idx, wildColor);
@@ -124,11 +128,12 @@ function connectGame() {
 
 function playCard(cardIndex, wildColor) {
   if (!stompClient) return;
+  console.log("Sending playCard: cardIndex=" + cardIndex + ", wildColor=" + wildColor);
   stompClient.send("/app/game/play", {}, JSON.stringify({
     token,
     playerId,
     cardIndex,
-    wildColor
+    wildColour: wildColor
   }));
 }
 

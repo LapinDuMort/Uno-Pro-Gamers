@@ -153,7 +153,10 @@ public class MultiplayerGameService {
         game.getDiscardPile().addToPile(p.playCard(cardIndex));
 
         if (wildColor != null) {
+            System.out.println("=== Setting wild colour to: " + wildColor);
             game.getDiscardPile().setWildColour(wildColor);
+        } else {
+            System.out.println("=== wildColor is NULL, not setting wild colour");
         }
 
         if (p.getHandSize() == 0) {

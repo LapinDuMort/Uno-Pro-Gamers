@@ -43,10 +43,13 @@ public class Game {
     public boolean isValidMove(Card topCard, Card selectedCard){
         if(topCard.getColour() == Colour.Wild)
         {
-            if (!"None".equals(this.discardPile.WildColour) &&
+            System.out.println("=== Wild card on top. WildColour=" + this.discardPile.WildColour + ", selectedCard colour=" + selectedCard.getColour());
+            if (this.discardPile.WildColour != null && !this.discardPile.WildColour.equals("None") &&
                     this.discardPile.WildColour.equals(selectedCard.getColour().toString())) {
+                System.out.println("=== Wild match! Valid move.");
                 return true;
             }
+            System.out.println("=== Wild does not match. Invalid move.");
         }
         if(topCard.getColour() == selectedCard.getColour()) {return true;}
         else if(topCard.getValue() == selectedCard.getValue()) {return true;}
