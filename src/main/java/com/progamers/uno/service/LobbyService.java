@@ -1,5 +1,6 @@
 package com.progamers.uno.service;
 
+import com.progamers.uno.domain.multiplayer.lobby.LobbyPlayer;
 import com.progamers.uno.domain.multiplayer.lobby.LobbySession;
 import com.progamers.uno.domain.multiplayer.lobby.LobbySnapshot;
 import com.progamers.uno.domain.multiplayer.lobby.LobbyState;
@@ -8,6 +9,8 @@ import com.progamers.uno.domain.multiplayer.lobby.exception.LobbyException;
 import com.progamers.uno.domain.multiplayer.lobby.exception.LobbyFullException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -49,7 +52,7 @@ public class LobbyService {
      * @throws LobbyException if lobby is already open or in-progress
      * @throws LobbyFullException if lobby full
      */
-    public synchronized LobbySnapshot joinLobby(String token, String playerId, String sessionId) {
+    public synchronized LobbySnapshot joinLobby(String token, String playerId, String playerName, String sessionId) {
         validateToken(token);
 
         if (this.session.getLobbyState() != LobbyState.OPEN) {
@@ -62,7 +65,7 @@ public class LobbyService {
             throw new LobbyFullException();
         }
 
-        this.session.putPlayerIfAbsent(playerId, sessionId);
+        this.session.putPlayerIfAbsent(playerId, playerName, sessionId);
 
         return snapshot();
     }
@@ -74,6 +77,31 @@ public class LobbyService {
                 this.session.getPlayerIdsInOrder(),
                 this.session.hasToken()
         );
+    }
+
+    public synchronized LobbySnapshot getLobbyStatus() { return snapshot(); }
+
+    public synchronized LobbySnapshot startGame(String token) {
+        validateToken(token);
+
+        if (this.session.getLobbyState() != LobbyState.OPEN) {
+            throw new LobbyException("Lobby is not open");
+        }
+        if (!Objects.equals(session.getActiveToken(), token)) {
+            throw new InvalidTokenException();
+        }
+        if (session.playerCount() < 2) {
+            throw new LobbyException("Need at least 2 players to start.");
+        }
+
+        this.session.setActiveToken(null);
+        this.session.setLobbyState(LobbyState.IN_PROGRESS);
+
+        return snapshot();
+    }
+
+    public synchronized List<LobbyPlayer> getPlayersInOrder() {
+        return new ArrayList<>(this.session.getPlayerMap().values());
     }
 
     private void validateToken(String token) {

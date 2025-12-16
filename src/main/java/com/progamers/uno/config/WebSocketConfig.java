@@ -18,7 +18,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws-uno")
+        registry.addEndpoint("/ws")     // removes -uno suffix from endpoint
                 .setAllowedOrigins("http://localhost:8080") // Specify your allowed origins here
                 .withSockJS();
     }

@@ -14,4 +14,5 @@ import lombok.NoArgsConstructor;
 public class JoinRequestDTO {
     private String token;
     private String playerId;
+    private String playerName;
 }

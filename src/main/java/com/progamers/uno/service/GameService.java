@@ -8,8 +8,9 @@ import lombok.Getter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -19,13 +20,7 @@ public class GameService {
 
     private final Game game;
     private boolean gameOver;
-    private boolean isReverse;
-    private int turnTracker;
-    private int numberOfPlayers;
-    private List<Player> playerList;
-    private Player activePlayer;
-    private Player playerOne;
-    private Player playerTwo;
+    private final Map<String, Player> players = new HashMap<>();
 
     public GameService() {
         this.game = new Game();
@@ -88,27 +83,36 @@ public class GameService {
         }
     }
 
-    public List<Card> getPlayerHand() {
-        return this.activePlayer.getPlayerHand();
+    private Player getOrCreatePlayer(String playerId) {
+        return players.computeIfAbsent(playerId, id -> {
+            Player p = new Player();
+            // Give a starting hand for new players
+            this.game.drawCards(p, 7);
+            return p;
+        });
+    }
+
+    // Keep old methods for backwards compat, add player-specific ones
+
+    public List<Card> getPlayerHand(String playerId) {
+        return getOrCreatePlayer(playerId).getPlayerHand();
     }
 
     public Card getTopDiscard() {
         return this.game.getDiscardPile().getTopCard();
     }
 
-    public boolean hasUno() {
-        return this.activePlayer.getHasUno();
+    public boolean hasUno(String playerId) {
+        return getOrCreatePlayer(playerId).getHasUno();
     }
 
-    public void declareUno() {
-        this.activePlayer.declareUno();
+    public void declareUno(String playerId) {
+        getOrCreatePlayer(playerId).declareUno();
     }
 
-    public void drawCard() {
+    public void drawCard(String playerId) {
         if (gameOver) return;
-        this.game.drawCards(this.activePlayer, 1);
-        this.turnTracker = this.game.incrementTurn(this.turnTracker, this.numberOfPlayers, this.isReverse);
-        whoseTurn();
+        this.game.drawCards(getOrCreatePlayer(playerId), 1);
     }
 
 
@@ -120,52 +124,30 @@ public class GameService {
         return "None";
     }
 
-    public void playCard(int index, String WildColor) throws Exception {
-        playCard(index);
-        if(WildColor != null) {
-            this.game.getDiscardPile().setWildColour(WildColor);
-        }
-    }
-
-
-    public void playCard(int index) throws Exception {
+    public void playCard(String playerId, int index, String wildColor) throws Exception {
         if (gameOver) return;
-
-        Card selectedCard = this.activePlayer.getCurrentSelectedCard(index);
+        Player p = getOrCreatePlayer(playerId);
+        Card selectedCard = p.getCurrentSelectedCard(index);
         Card topCard = this.game.getDiscardPile().getTopCard();
 
         if (!this.game.isValidMove(topCard, selectedCard)) return;
 
-        if (activePlayer.getHandSize() == 1 && !this.activePlayer.getHasUno()) {
-            this.game.drawCards(this.activePlayer, 2);
+        if (p.getHandSize() == 1 && !p.getHasUno()) {
+            this.game.drawCards(p, 2);
             return;
         }
 
-        this.game.getDiscardPile().addToPile(
-                this.activePlayer.playCard(index));
+        this.game.getDiscardPile().addToPile(p.playCard(index));
+        if (wildColor != null) {
+            this.game.getDiscardPile().setWildColour(wildColor);
+        }
 
-        this.turnTracker = this.game.incrementTurn(this.turnTracker, this.numberOfPlayers, this.isReverse);
-        whoseTurn();
-
-        checkSpecialCard(selectedCard);
-
-        if (this.activePlayer.getHandSize() == 0) {
+        if (p.getHandSize() == 0) {
             this.gameOver = true;
         }
     }
-    public void checkSpecialCard(Card selectedCard) {
-        //checking for SpecialCards functions
-        if(SpecialCards.checkForDraw(selectedCard.getValue()) == 4){
-            this.game.drawCards(this.activePlayer, 4);
-            this.turnTracker = this.game.incrementTurn(this.turnTracker, this.numberOfPlayers, this.isReverse);
-        }
-        else if (SpecialCards.checkForDraw(selectedCard.getValue()) == 2){
-            this.game.drawCards(this.activePlayer, 2);
-            this.turnTracker = this.game.incrementTurn(this.turnTracker, this.numberOfPlayers, this.isReverse);
-        }
-        else if (SpecialCards.checkForSkip(selectedCard.getValue())){
-            this.turnTracker = this.game.incrementTurn(this.turnTracker, this.numberOfPlayers, this.isReverse);
-        }
-        this.isReverse = SpecialCards.checkForReverse(selectedCard.getValue(), this.isReverse);
+
+    public void playCard(String playerId, int index) throws Exception {
+        playCard(playerId, index, null);
     }
 }

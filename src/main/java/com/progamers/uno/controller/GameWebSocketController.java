@@ -1,47 +1,79 @@
 package com.progamers.uno.controller;
 
-import com.progamers.uno.dto.PlayCardMessage;
-import com.progamers.uno.service.GameService;
-import com.progamers.uno.dto.GameStateDto;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.progamers.uno.domain.multiplayer.game.dto.DeclareUnoRequestDTO;
+import com.progamers.uno.domain.multiplayer.game.dto.DrawCardRequestDTO;
+import com.progamers.uno.domain.multiplayer.game.dto.PlayCardRequestDTO;
+import com.progamers.uno.service.MultiplayerGameService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 @Controller
+@RequiredArgsConstructor
 public class GameWebSocketController {
 
-    @Autowired
-    private GameService gameService;
+    private final MultiplayerGameService gameService;
+    private final SimpMessagingTemplate messaging;
 
-    @MessageMapping("/draw")
-    @SendTo("/topic/gamestate")
-    public GameStateDto drawCard() throws Exception {
-        gameService.drawCard();
-        return buildGameState();
+    @MessageMapping("/game/play")
+    public void play(PlayCardRequestDTO dto) throws Exception {
+        try {
+            gameService.playCard(dto.getPlayerId(), dto.getCardIndex(), dto.getWildColour());
+            publish(dto.getToken());
+        } catch (Exception e) {
+            System.err.println("Play card error for " + dto.getPlayerId() + ": " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
-    @MessageMapping("/play")
-    @SendTo("/topic/gamestate")
-    public GameStateDto playCard(PlayCardMessage message) throws Exception {
-        gameService.playCard(message.getCardIndex(), message.getWildColor());
-        return buildGameState();
+    @MessageMapping("/game/draw")
+    public void draw(DrawCardRequestDTO dto) {
+        try {
+            gameService.drawCard(dto.getPlayerId());
+            publish(dto.getToken());
+        } catch (Exception e) {
+            System.err.println("Draw card error for " + dto.getPlayerId() + ": " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
-    @MessageMapping("/uno")
-    @SendTo("/topic/gamestate")
-    public GameStateDto declareUno() throws Exception {
-        gameService.declareUno();
-        return buildGameState();
+    @MessageMapping("/game/uno")
+    public void uno(DeclareUnoRequestDTO dto) {
+        try {
+            gameService.declareUno(dto.getPlayerId());
+            publish(dto.getToken());
+        } catch (Exception e) {
+            System.err.println("Declare uno error for " + dto.getPlayerId() + ": " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
-    private GameStateDto buildGameState() {
-        return GameStateDto.builder()
-                .playerHand(gameService.getPlayerHand())
-                .discardCard(gameService.getTopDiscard())
-                .wildColour(gameService.checkTopDiscardWild())
-                .gameOver(gameService.isGameOver())
-                .hasUno(gameService.hasUno())
-                .build();
+    @MessageMapping("/game/sync")
+    public void syncGameState(PlayCardRequestDTO dto) {
+        System.out.println("=== Client requesting game sync for token: " + dto.getToken() + ", playerId: " + dto.getPlayerId());
+        try {
+            publish(dto.getToken());
+        } catch (Exception e) {
+            System.err.println("Sync error: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void publish(String token) {
+        // public snapshot
+        messaging.convertAndSend(
+                "/topic/game/" + token,
+                gameService.publicSnapshot()
+        );
+
+        // per-player hands (demo-safe)
+        for (String playerId : gameService.getTurnOrder()) {
+            messaging.convertAndSend(
+                    "/topic/game/" + token + "/hand/" + playerId,
+                    gameService.getHand(playerId)
+            );
+        }
     }
 }

@@ -40,8 +40,8 @@ public class LobbySession {
 
     public List<String> getPlayerIdsInOrder() { return new ArrayList<>(this.playerMap.keySet()); }
 
-    public void putPlayerIfAbsent(String playerId, String sessionId) {
-        playerMap.putIfAbsent(playerId, new LobbyPlayer(playerId, sessionId));
+    public void putPlayerIfAbsent(String playerId, String playerName, String sessionId) {
+        playerMap.putIfAbsent(playerId, new LobbyPlayer(playerId, playerName, sessionId));
     }
 
     public void reset() {

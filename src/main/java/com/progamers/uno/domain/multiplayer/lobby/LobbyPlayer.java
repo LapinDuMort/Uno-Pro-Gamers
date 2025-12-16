@@ -11,5 +11,6 @@ import lombok.Data;
 @AllArgsConstructor
 public class LobbyPlayer {
     private final String playerId;
+    private final String playerName;
     private final String sessionId;
 }
