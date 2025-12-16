@@ -1,6 +1,7 @@
 package com.progamers.uno.service;
 
 import com.progamers.uno.domain.game.SpecialCards;
+import com.progamers.uno.domain.player.Bots;
 import com.progamers.uno.domain.player.Player;
 import com.progamers.uno.domain.cards.Card;
 import com.progamers.uno.domain.game.Game;
@@ -27,7 +28,7 @@ public class GameService {
     private Player playerOne;
     private Player playerTwo;
 
-    public GameService() {
+    public GameService() throws Exception {
         this.game = new Game();
         this.game.getCardDeck().shuffle();
         this.game.getDiscardPile().addToPile(
@@ -39,8 +40,8 @@ public class GameService {
         //currently set to 1, but will adapt to game size later
         this.numberOfPlayers = 1;
         this.playerList = new ArrayList<>();
-        this.playerOne = new Player(1, "test1");
-        this.playerTwo = new Player(2, "test2");
+        this.playerOne = new Player(1, "test1", false);
+        this.playerTwo = new Player(2, "test2", true);
         this.playerList.add(this.playerOne);
         this.playerList.add(this.playerTwo);
         whoseTurn();
@@ -51,15 +52,16 @@ public class GameService {
         this.playerList.add(player);
     }
 
-    public void whoseTurn(){
+    public void whoseTurn() throws Exception {
         for(Player player : this.playerList){
             if(this.turnTracker == player.getPlayerNumber()){
                 this.activePlayer = player;
             }
         }
+        botPlayerPlayCard();
     }
 
-    public void playerSelect() {
+    public void playerSelect() throws Exception {
         Scanner scanner = new Scanner(System.in);
         int playersInGame;
         while (true) {
@@ -71,16 +73,37 @@ public class GameService {
         }
         for (int i = 1; i <= playersInGame; i++) {
 
+            boolean isBot;
+            while(true){
+                Scanner botScanner = new Scanner(System.in);
+                System.out.println("Is this player a bot? (y/n): ");
+                String createBotPlayer = botScanner.next();
+                if (createBotPlayer.equalsIgnoreCase("y")){
+                    isBot = true;
+                    break;
+                }
+
+                else if(createBotPlayer.equalsIgnoreCase("n")){
+                    isBot = false;
+                    break;
+                }
+            }
             String playerName;
-            Scanner nameScanner = new Scanner(System.in);
-            System.out.println("Enter player " + (i) + "'s name: ");
-            playerName = nameScanner.next();
-            Player player = new Player(i, playerName);
+            if (!isBot){
+                Scanner nameScanner = new Scanner(System.in);
+                System.out.println("Enter player " + (i) + "'s name: ");
+                playerName = nameScanner.next();
+            }
+            else{
+                playerName = "Bot " + i;
+            }
+            Player player = new Player(i, playerName, isBot);
             addPlayers(player);
         }
         whoseTurn();
         this.numberOfPlayers = playersInGame;
     }
+
     public void dealStartingHands(){
         for(Player player : this.playerList){
             this.game.drawCards(player, 7);
@@ -103,7 +126,7 @@ public class GameService {
         this.activePlayer.declareUno();
     }
 
-    public void drawCard() {
+    public void drawCard() throws Exception {
         if (gameOver) return;
         this.game.drawCards(this.activePlayer, 1);
         this.turnTracker = this.game.incrementTurn(this.turnTracker, this.numberOfPlayers, this.isReverse);
@@ -119,6 +142,26 @@ public class GameService {
         return "None";
     }
 
+    public void botPlayerPlayCard() throws Exception {
+        Card topCard = this.game.getDiscardPile().getTopCard();
+        if (activePlayer.getIsBot()){
+            String validMove = Bots.botPlay(activePlayer, topCard);
+            List<Card> playerHand = activePlayer.getPlayerHand();
+            if (validMove.equals("none")){
+                this.game.drawCards(activePlayer, 1);
+            }
+            else{
+            for(int i = 0; i < activePlayer.getPlayerHand().size(); i++) {
+                if (playerHand.get(i).toString().equals(validMove)) {
+                    System.out.println(playerHand.get(i).toString().equals(validMove));
+                    playCard(i);
+                    break;
+                }
+            }
+            }
+        }
+    }
+
     public void playCard(int index, String WildColor) throws Exception {
         playCard(index);
         if(WildColor != null) {
@@ -130,8 +173,9 @@ public class GameService {
     public void playCard(int index) throws Exception {
         if (gameOver) return;
 
-        Card selectedCard = this.activePlayer.getCurrentSelectedCard(index);
+
         Card topCard = this.game.getDiscardPile().getTopCard();
+        Card selectedCard = this.activePlayer.getCurrentSelectedCard(index);
 
         if (!this.game.isValidMove(topCard, selectedCard)) return;
 

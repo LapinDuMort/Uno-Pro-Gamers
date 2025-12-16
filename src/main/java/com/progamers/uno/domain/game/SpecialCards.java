@@ -5,13 +5,13 @@ import com.progamers.uno.domain.cards.Value;
 import com.progamers.uno.domain.player.Player;
 
 public class SpecialCards {
-    public Colour checkForWild(Colour playableColour) {
-        if(playableColour == Colour.Wild) {
-            //TODO: currently always returns red, pending hookup to user input
-            playableColour = ValidityChecker.pickColour(1);
-            return playableColour;
-        }
-        return playableColour;}
+//    public Colour checkForWild(Colour playableColour) {
+//        if(playableColour == Colour.Wild) {
+//            //TODO: currently always returns red, pending hookup to user input
+//            playableColour = ValidityChecker.pickColour(1);
+//            return playableColour;
+//        }
+//        return playableColour;}
 
     public static int checkForDraw(Value playableValue) {
         //Adds 4 cards to player on WildFour

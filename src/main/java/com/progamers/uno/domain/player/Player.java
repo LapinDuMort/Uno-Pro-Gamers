@@ -19,13 +19,15 @@ public class Player {
     private int currentSelected;
     private int playerNumber;
     private String playerName;
+    private boolean isBot;
 
-    public Player(int playerNumber, String playerName) {
+    public Player(int playerNumber, String playerName, boolean isBot) {
         this.hasUno = false;
         this.playerHand = new ArrayList<Card>();
         this.currentSelected = 0;
         this.playerNumber = playerNumber;
         this.playerName = playerName;
+        this.isBot = isBot;
     }
     public Card getCurrentSelectedCard(int index) throws Exception {
         // Check if the player's hand is empty
@@ -47,17 +49,6 @@ public class Player {
         return playerHand.remove(index);
     }
 
-    @Deprecated
-    public boolean drawStartingHand(int HandSize){
-        // Drawing the starting hand
-        // Will be removed later and drawCard will be called externally to pass
-        // a card from a deck to the player
-        for(int i = 0; i < HandSize; i++)
-        {
-            addCardToHand(Card.builder().colour(Colour.Red).value(Value.getValue(i)).build());
-        }
-        return true;
-    }
 
     public void addCardToHand (Card card) {
         // Adds a given card to the player's hand
@@ -97,6 +88,10 @@ public class Player {
 
     public int getHandSize() {
         return playerHand.size();
+    }
+
+    public boolean getIsBot(){
+        return this.isBot;
     }
 
 

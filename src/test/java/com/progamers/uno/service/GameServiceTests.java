@@ -17,10 +17,10 @@ public class GameServiceTests {
     private Player player;
 
     @BeforeEach
-    void setup() {
+    void setup() throws Exception {
         gameService = new GameService();
         game = gameService.getGame();
-        player = gameService.getPlayer();
+        player = new Player(1, "test", false);
     }
 
     /**
@@ -48,7 +48,7 @@ public class GameServiceTests {
     /* --- drawCard tests --- */
 
     @Test
-    void testDrawCard_whenGameNotOver_thenIncreasesHandSize() {
+    void testDrawCard_whenGameNotOver_thenIncreasesHandSize() throws Exception {
         // capture initial hand size
         int handSize = player.getHandSize();
         assertFalse(gameService.isGameOver());

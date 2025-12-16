@@ -13,9 +13,9 @@ public class ValidityChecker {
     public static boolean isValid(Card topCard, Card selectedCard) {
         Colour playableColour = topCard.getColour();
         Value playableValue = topCard.getValue();
-        if(playableColour == Colour.Wild) {
-            playableColour = pickColour(userInputColour());
-        }
+//        if(playableColour == Colour.Wild) {
+//            playableColour = pickColour(userInputColour());
+//        }
         if(playableColour == selectedCard.getColour()) {return true;}
         else if(playableValue == selectedCard.getValue()) {return true;}
         else if(selectedCard.getColour() == Colour.Wild) {return true;}

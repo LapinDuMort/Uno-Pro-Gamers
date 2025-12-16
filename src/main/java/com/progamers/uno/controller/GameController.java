@@ -38,7 +38,7 @@ public class GameController {
     }
 
     @PostMapping("/draw")
-    public RedirectView drawCard() {
+    public RedirectView drawCard() throws Exception {
         if (gameService.isGameOver()) {
             return new RedirectView("/gameover");
         }
