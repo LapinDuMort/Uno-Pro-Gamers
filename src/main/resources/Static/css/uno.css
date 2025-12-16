@@ -1,94 +1,145 @@
+/* ===== Player Hand ===== */
 .hand {
-     position: relative;
-     width: 90vw;
-     height: 150px;
-     margin: 0 auto;
-     padding: 20px 0;
-     --card-width: 200px;
+    position: relative; /* Required for absolute-positioned cards */
+    display: grid;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 22px;
+
+    background: linear-gradient(180deg, #2c3e50, #1f2d3a);
+    padding: 18px 20px 20px 20px;
+    border-radius: 14px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+
+    margin: 0 auto;
+    max-width: 90%;
+    height: 150px;
+    min-height: 150px;
+    max-height: 150px;
+
+    --spacing-unit: 45px; /* Controls card overlap */
 }
-/* Base card */
- .uno-card {
-     position: absolute;
-     bottom: 0;
-     width: 110px;
-     height: 160px;
-     border-radius: 16px;
-     background: var(--card-colour, black);
-     color: white;
-     font-size: 36px;
-     font-weight: bold;
-     text-shadow:
-             1px 1px 0 black,
-            -1px 1px 0 black,
-             1px -1px 0 black,
-            -1px -1px 0 black;
-     display: flex;
-     justify-content: center;
-     align-items: center;
-     cursor: pointer;
-     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5), 0 0 5px rgba(255, 255, 255, 0.1);
-     transition: transform 0.25s ease, z-index 0.25s ease;
-    /* DYNAMIC POSITIONING for the hand */
-     left: calc(var(--i) * var(--spacing-unit));
-     z-index: var(--i);
+
+/* ===== UNO Card Base ===== */
+.uno-card {
+    position: absolute;
+    bottom: 10px;
+    width: 110px;
+    height: 160px;
+    border-radius: 16px;
+
+    background: var(--card-colour, black);
+    color: white;
+    font-size: 36px;
+    font-weight: bold;
+    text-shadow:
+        1px 1px 0 black,
+       -1px 1px 0 black,
+        1px -1px 0 black,
+       -1px -1px 0 black;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+
+    box-shadow: 0 8px 15px rgba(0,0,0,0.5), 0 0 5px rgba(255,255,255,0.1);
+    transition: transform 0.25s ease, z-index 0.25s ease;
+
+    /* Dynamic positioning */
+    left: calc(var(--i) * var(--spacing-unit));
+    z-index: var(--i);
 }
-/* Classic white border */
- .uno-card::before {
-     content: "";
-     position: absolute;
-     inset: 4px;
-     border: 4px solid white;
-     border-radius: 12px;
-     pointer-events: none;
+
+/* Card border */
+.uno-card::before {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    border: 4px solid white;
+    border-radius: 12px;
+    pointer-events: none;
 }
-/* Card value behind overlapping cards */
- .uno-card .value {
-     position: relative;
-     z-index: 0;
+
+/* Card value */
+.uno-card .value {
+    position: relative;
+    z-index: 0;
 }
-/* Hover effect for hand cards */
+
+/* Hover effect */
 .hand .uno-card:hover {
     transform: translateY(-20px) scale(1.05);
     z-index: 999;
     box-shadow: 0 8px 15px rgba(0,0,0,0.6);
 }
-/* Disable hover for draw/discard piles */
-.uno-card.single:hover {
-     transform: none;
-     box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-}
-/*(draw/discard cards)*/
+
+/* Single card (draw/discard pile) */
 .uno-card.single {
     background: var(--card-colour, grey);
-    width: 110px;
-    height: 160px;
     position: relative !important;
-    margin-left: 0px;
+    margin-left: 0;
 }
 
+.uno-card.single:hover {
+    transform: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
 
-
-
-
-
+/* ===== Color Popup ===== */
 .color-popup {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
+
+    background: linear-gradient(180deg, #2c3e50, #1f2d3a);
+    padding: 22px;
+
+    border-radius: 14px;
     text-align: center;
-    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    color: #ecf0f1;
+
+    box-shadow: 0 12px 30px rgba(0,0,0,0.5);
     z-index: 9999;
 }
 
-.color-popup button {
-    margin: 5px;
-    padding: 10px 20px;
-    border-radius: 8px;
+/* Popup buttons */
+.color-popup button,
+.wild-btn {
+    margin: 6px;
+    padding: 10px 22px;
+
+    border-radius: 12px;
     border: none;
+
     cursor: pointer;
     font-weight: bold;
+    font-size: 14px;
+
+    box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Hover / click feedback */
+.color-popup button:hover,
+.wild-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(0,0,0,0.55);
+}
+
+.color-popup button:active,
+.wild-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+}
+
+/* ===== Wild Buttons by Color ===== */
+.wild-btn.red { background: #e74c3c; }
+.wild-btn.blue { background: #3498db; }
+.wild-btn.green { background: #2ecc71; }
+.wild-btn.yellow {
+    background: #f1c40f;
+    color: #2c3e50;
+    text-shadow: none;
 }

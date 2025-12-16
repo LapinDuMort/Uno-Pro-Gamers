@@ -44,7 +44,6 @@
 
     <h1>UNO Game</h1>
     <div class="game-board">
-
         <div class="pile">
             <h2>Draw Pile</h2>
             <div class="uno-card single">?</div>
@@ -62,7 +61,6 @@
     </div>
 
     <h1>Your Hand</h1>
-    </div>
     <div class="hand" id="hand-container">
         <form th:each="card, iter : ${playerHand}"
               th:id="'playForm' + ${iter.index}"
@@ -84,10 +82,10 @@
         <form id="wildForm" th:action="@{/play}" method="post">
             <input type="hidden" name="cardIndex" id="wildCardIndex">
             <input type="hidden" name="wildoutput" id="wildColor">
-            <button type="button" onclick="chooseColor('Red')">Red</button>
-            <button type="button" onclick="chooseColor('Yellow')">Yellow</button>
-            <button type="button" onclick="chooseColor('Green')">Green</button>
-            <button type="button" onclick="chooseColor('Blue')">Blue</button>
+            <button type="button" class="wild-btn red" onclick="chooseColor('Red')">Red</button>
+            <button type="button" class="wild-btn blue" onclick="chooseColor('Blue')">Blue</button>
+            <button type="button" class="wild-btn green" onclick="chooseColor('Green')">Green</button>
+            <button type="button" class="wild-btn yellow" onclick="chooseColor('Yellow')">Yellow</button>
         </form>
     </div>
     <script th:src="@{/js/play-card.js}"></script>
