@@ -39,11 +39,11 @@ public class LobbyServiceTests {
         // open new lobby with token
         lobbyService.openLobby(token);
         // attempt to join lobby as player
-        LobbySnapshot snap = lobbyService.joinLobby(token, "p1", "s1");
+        LobbySnapshot snap = lobbyService.joinLobby(token, "p1", "Player1", "s1");
         // lobby snapshot should contain player
-        assertTrue(snap.getPlayerIds().contains("p1"));
+        assertTrue(snap.getPlayerNames().contains("Player1"));
         // 1 player in lobby
-        assertEquals(1, snap.getPlayerIds().size());
+        assertEquals(1, snap.getPlayerNames().size());
     }
 
     @Test
@@ -54,7 +54,7 @@ public class LobbyServiceTests {
         lobbyService.openLobby(token);
         // reject invalid token
         assertThrows(InvalidTokenException.class,
-                () -> lobbyService.joinLobby(UUID.randomUUID().toString(), "p1", "s1"));
+                () -> lobbyService.joinLobby(UUID.randomUUID().toString(), "p1", "Player2", "s1"));
     }
 
     @Test
@@ -65,12 +65,12 @@ public class LobbyServiceTests {
         lobbyService.openLobby(token);
         // join 8 players to lobby
         for (int i = 1; i <= 8; i++) {
-            lobbyService.joinLobby(token, "p" + i, "s" + i);
+            lobbyService.joinLobby(token, "p" + i, "player" + i, "s" + i);
         }
         // attempt to join 9th player
         // throws exception
         assertThrows(LobbyFullException.class,
-                () -> lobbyService.joinLobby(token, "p9", "s9"));
+                () -> lobbyService.joinLobby(token, "p9", "player9", "s9"));
     }
 
 }
