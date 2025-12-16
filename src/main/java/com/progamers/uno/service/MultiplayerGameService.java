@@ -165,6 +165,13 @@ public class MultiplayerGameService {
         if (playedCard.getValue().equals(Value.Skip)) {
             // Skip card: advance turn twice to skip the next player
             advanceTurn();
+        } else if (playedCard.getValue().equals(Value.DrawTwo)) {
+            // DrawTwo card: next player draws 2 cards and their turn is skipped
+            advanceTurn();
+            Player nextPlayer = requirePlayer(getCurrentPlayerId());
+            game.drawCards(nextPlayer, 2);
+            advanceTurn();
+            return;
         }
 
         if (p.getHandSize() == 0) {
