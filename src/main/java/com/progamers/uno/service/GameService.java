@@ -7,7 +7,9 @@ import lombok.Getter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -17,6 +19,7 @@ public class GameService {
     private final Game game;
     private final Player player;
     private boolean gameOver;
+    private final Map<String, Player> players = new HashMap<>();
 
     public GameService() {
         this.game = new Game();
@@ -28,25 +31,36 @@ public class GameService {
         this.game.drawCards(this.player, 7);
     }
 
-    public List<Card> getPlayerHand() {
-        return this.player.getPlayerHand();
+    private Player getOrCreatePlayer(String playerId) {
+        return players.computeIfAbsent(playerId, id -> {
+            Player p = new Player();
+            // Give a starting hand for new players
+            this.game.drawCards(p, 7);
+            return p;
+        });
+    }
+
+    // Keep old methods for backwards compat, add player-specific ones
+
+    public List<Card> getPlayerHand(String playerId) {
+        return getOrCreatePlayer(playerId).getPlayerHand();
     }
 
     public Card getTopDiscard() {
         return this.game.getDiscardPile().getTopCard();
     }
 
-    public boolean hasUno() {
-        return this.player.getHasUno();
+    public boolean hasUno(String playerId) {
+        return getOrCreatePlayer(playerId).getHasUno();
     }
 
-    public void declareUno() {
-        this.player.declareUno();
+    public void declareUno(String playerId) {
+        getOrCreatePlayer(playerId).declareUno();
     }
 
-    public void drawCard() {
+    public void drawCard(String playerId) {
         if (gameOver) return;
-        this.game.drawCards(this.player, 1);
+        this.game.drawCards(getOrCreatePlayer(playerId), 1);
     }
 
 
@@ -58,33 +72,30 @@ public class GameService {
         return "None";
     }
 
-    public void playCard(int index, String WildColor) throws Exception {
-        playCard(index);
-        if(WildColor != null) {
-            this.game.getDiscardPile().setWildColour(WildColor);
-        }
-    }
-
-
-    public void playCard(int index) throws Exception {
+    public void playCard(String playerId, int index, String wildColor) throws Exception {
         if (gameOver) return;
-
-        Card selectedCard = this.player.getCurrentSelectedCard(index);
+        Player p = getOrCreatePlayer(playerId);
+        Card selectedCard = p.getCurrentSelectedCard(index);
         Card topCard = this.game.getDiscardPile().getTopCard();
 
         if (!this.game.isValidMove(topCard, selectedCard)) return;
 
-        if (player.getHandSize() == 1 && !this.player.getHasUno()) {
-            this.game.drawCards(this.player, 2);
+        if (p.getHandSize() == 1 && !p.getHasUno()) {
+            this.game.drawCards(p, 2);
             return;
         }
 
-        this.game.getDiscardPile().addToPile(
-                this.player.playCard(index)
-        );
+        this.game.getDiscardPile().addToPile(p.playCard(index));
+        if (wildColor != null) {
+            this.game.getDiscardPile().setWildColour(wildColor);
+        }
 
-        if (this.player.getHandSize() == 0) {
+        if (p.getHandSize() == 0) {
             this.gameOver = true;
         }
+    }
+
+    public void playCard(String playerId, int index) throws Exception {
+        playCard(playerId, index, null);
     }
 }

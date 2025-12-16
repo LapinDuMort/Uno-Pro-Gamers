@@ -126,10 +126,22 @@ function connect() {
       $("startBtn").disabled = !canStart;
     });
 
+    log("Subscribing to /topic/game/events");
+    console.log("Subscribing to /topic/game/events");
     stompClient.subscribe("/topic/game/events", (msg) => {
-        if (msg.body === "STARTED") {
-            window.location.href = "/game.html";
-        }
+      const body = msg.body ? msg.body.trim() : "";
+      log(`Received game event: "${body}" (raw: "${msg.body}")`);
+      console.log("Game event received:", body, "raw:", msg.body);
+      if (body === "STARTED") {
+          log("Game STARTED event received, redirecting...");
+          const tokenVal = $("token").value.trim();
+          const playerIdVal = sessionStorage.getItem(SS_PLAYER_ID) || "";
+          log(`Redirecting to /game?token=${tokenVal}&playerId=${playerIdVal}`);
+          console.log("Redirecting with token:", tokenVal, "playerId:", playerIdVal);
+          window.location.href = `/game?token=${encodeURIComponent(tokenVal)}&playerId=${encodeURIComponent(playerIdVal)}`;
+      } else {
+          log(`Unexpected game event body: "${body}" (type: ${typeof body})`);
+      }
     });
 
     stompClient.send("/app/lobby/status", {}, JSON.stringify({}));
@@ -178,6 +190,8 @@ function startGame(playerId) {
   const token = $("token").value.trim();
   if (!token) return log("Token is required to start game.");
 
+  log(`Starting game with token: ${token}, playerId: ${playerId}`);
+  console.log("Sending /app/lobby/start with:", { token, playerId });
   stompClient.send("/app/lobby/start", {}, JSON.stringify({ token, playerId }));
   log("Sent: /app/lobby/start");
   updateStatus("Starting game...");
@@ -189,7 +203,7 @@ function goToGamePage(playerId) {
   if (!token) return log("Token is required to go to game page.");
 
   window.location.href =
-    `/game.html?token=${encodeURIComponent(token)}&playerId=${encodeURIComponent(playerId)}`;
+    `/game?token=${encodeURIComponent(token)}&playerId=${encodeURIComponent(playerId)}`;
 }
 
 (function init() {

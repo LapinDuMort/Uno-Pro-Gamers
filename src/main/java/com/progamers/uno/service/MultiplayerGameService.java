@@ -33,8 +33,8 @@ public class MultiplayerGameService {
     }
 
     public synchronized void startFromLobby(String token) {
-        // Validates token + transitions lobby -> IN_PROGRESS (your existing behavior) :contentReference[oaicite:2]{index=2}
-        lobbyService.startGame(token);
+        // Note: lobbyService.startGame(token) is called by LobbyWebSocketController
+        // Do not call it again here to avoid "Lobby is not open" error
 
         // Fresh game each start (demo-safe)
         Game g = new Game();
@@ -51,7 +51,7 @@ public class MultiplayerGameService {
         // Create per-player Player and deal 7 each
         for (LobbyPlayer lp : lobbyService.getPlayersInOrder()) {
             Player p = new Player();
-            g.drawCards(p, 7); // already player-parameterized :contentReference[oaicite:3]{index=3}
+            g.drawCards(p, 7); // already player-parameterized
             playersById.put(lp.getPlayerId(), p);
             playerNamesById.put(lp.getPlayerId(), lp.getPlayerName());
             turnOrder.add(lp.getPlayerId());

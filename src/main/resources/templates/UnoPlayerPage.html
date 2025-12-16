@@ -1,220 +1,267 @@
-    <!DOCTYPE html>
-    <html xmlns:th="http://www.thymeleaf.org" lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>UNO Game</title>
-        <link rel="stylesheet" href="/css/globalstyle.css">
-        <link rel="stylesheet" href="/css/uno.css">
-    </head>
-    <body>
-    <h1>UNO Game</h1>
-    <div class="game-board">
-        <div class="pile">
-            <h2>Draw Pile</h2>
-            <div class="uno-card single">?</div>
-            <button class="draw-button" id="drawButton" onclick="drawCard()">Draw Card</button>
-        </div>
-        <div class="pile">
-            <h2>Discard Pile</h2>
-            <div id="discardCard" class="uno-card single"
-                 th:style="|--card-colour:${#strings.equals(discardCard.colour, 'Wild') ? wildColour : discardCard.colour}|">
-                <div id="discardValue" class="value" th:text="${discardCard.value}"></div>
-            </div>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNO Game</title>
+    <link rel="stylesheet" href="/css/globalstyle.css">
+    <link rel="stylesheet" href="/css/uno.css">
+</head>
+<body>
+<h1>UNO Game</h1>
+<div class="game-board">
+    <div class="pile">
+        <h2>Draw Pile</h2>
+        <div class="uno-card single">?</div>
+        <form th:action="@{/draw}" method="post">
+            <input type="hidden" name="playerId" th:value="${playerId}" />
+            <button class="draw-button">Draw Card</button>
+        </form>
+    </div>
+    <div class="pile">
+        <h2>Discard Pile</h2>
+        <div id="discardCard" class="uno-card single"
+             th:style="|--card-colour:${#strings.equals(discardCard.colour, 'Wild') ? wildColour : discardCard.colour}|">
+            <div id="discardValue" class="value" th:text="${discardCard.value}"></div>
         </div>
     </div>
+</div>
 
-    <h2>Your Hand</h2>
-    <div id="handSize" th:text="'Hand Size - ' + ${playerHand.size()}"></div>
-    <div id="handContainer" class="hand"
-         th:with="cardCount=${playerHand.size()}"
-         th:style="|--total-cards:${cardCount};
-             --spacing-unit: ${cardCount > 1 ?#numbers.formatDecimal( (90 * 10 - 110) / (cardCount - 1), 0, 2) + 'vw / 10' :'0px'};|">
+<h2>Your Hand</h2>
+<div id="handSize" th:text="'Hand Size - ' + ${playerHand.size()}"></div>
+<div id="handContainer" class="hand"
+     th:with="cardCount=${playerHand.size()}"
+     th:style="|--total-cards:${cardCount};
+         --spacing-unit: ${cardCount > 1 ?#numbers.formatDecimal( (90 * 10 - 110) / (cardCount - 1), 0, 2) + 'vw / 10' :'0px'};|">
 
-        <div th:each="card, iter : ${playerHand}" style="display:inline-block">
+    <div th:each="card, iter : ${playerHand}" style="display:inline-block">
+        <form th:each="card, iter : ${playerHand}"
+              th:id="'playForm' + ${iter.index}"
+              th:action="@{/play}"
+              method="post"
+              style="display:inline-block">
+            <input type="hidden" name="cardIndex" th:value="${iter.index}" />
+            <input type="hidden" name="playerId" th:value="${playerId}" />
             <button type="button"
                     class="uno-card"
                     th:attr="data-index=${iter.index}, data-colour=${card.colour.name()}"
                     th:style="|--card-colour:${#strings.equals(card.colour, 'Wild') ? 'black' : card.colour}; --i:${iter.index}|">
                 <div class="value" th:text="${card.value}"></div>
             </button>
-        </div>
+        </form>
     </div>
+</div>
 
-    <!-- UNO declaration controls -->
-    <div class="uno-controls">
-        <p id="unoStatus" th:if="${hasUno}">UNO declared!</p>
-        <p id="unoStatusNot" th:if="${!hasUno}">UNO not declared!</p>
+<!-- UNO declaration controls -->
+<div class="uno-controls">
+    <p id="unoStatus" th:if="${hasUno}">UNO declared!</p>
+    <p id="unoStatusNot" th:if="${!hasUno}">UNO not declared!</p>
 
-        <button id="declareButton" class="uno-button" style="display:none;" onclick="declareUno()">Declare UNO</button>
-    </div>
+    <button id="declareButton" class="uno-button" style="display:none;" onclick="declareUno()">Declare UNO</button>
+</div>
 
-    <!-- Wild card color picker popup -->
-    <div id="colorPicker" class="color-popup" style="display:none;">
-        <h3>Pick a Color</h3>
-        <input type="hidden" id="wildCardIndex">
+<!-- Wild card color picker popup -->
+<div id="colorPicker" class="color-popup" style="display:none;">
+    <h3>Pick a Color</h3>
+    <input type="hidden" id="wildCardIndex">
+    <form id="wildForm" th:action="@{/play}" method="post">
+        <input type="hidden" name="cardIndex" id="wildCardIndex">
+        <input type="hidden" name="wildoutput" id="wildColor">
+        <input type="hidden" name="playerId" id="wildPlayerId" th:value="${playerId}">
         <button type="button" onclick="chooseColor('Red')">Red</button>
         <button type="button" onclick="chooseColor('Yellow')">Yellow</button>
         <button type="button" onclick="chooseColor('Green')">Green</button>
         <button type="button" onclick="chooseColor('Blue')">Blue</button>
-    </div>
+    </form>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
-    <script>
-        // Mapping from card value string to number/symbol
-        const valueMap = {
-            "ZERO": 0,
-            "ONE": 1,
-            "TWO": 2,
-            "THREE": 3,
-            "FOUR": 4,
-            "FIVE": 5,
-            "SIX": 6,
-            "SEVEN": 7,
-            "EIGHT": 8,
-            "NINE": 9,
-            "SKIP": "⏭",
-            "REVERSE": "⟳",
-            "DRAWTWO": "+2",
-            "WILD": "★",
-            "WILDFOUR": "★+4"
-        };
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+<script>
+    // Mapping from card value string to number/symbol
+    const valueMap = {
+        "ZERO": 0,
+        "ONE": 1,
+        "TWO": 2,
+        "THREE": 3,
+        "FOUR": 4,
+        "FIVE": 5,
+        "SIX": 6,
+        "SEVEN": 7,
+        "EIGHT": 8,
+        "NINE": 9,
+        "SKIP": "⏭",
+        "REVERSE": "⟳",
+        "DRAWTWO": "+2",
+        "WILD": "★",
+        "WILDFOUR": "★+4"
+    };
 
-        let stompClient = null;
-        let tempCardIndex = null;
+    let stompClient = null;
+    let tempCardIndex = null;
+    
+    // Extract playerId and token from URL parameters
+    function getPlayerId() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('playerId') || '';
+    }
+    
+    function getToken() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('token') || '';
+    }
+    
+    const playerId = getPlayerId();
+    const token = getToken();
 
-        function connect() {
-            const socket = new SockJS('/ws-uno');
-            stompClient = Stomp.over(socket);
-            stompClient.connect({}, function (frame) {
-                stompClient.subscribe('/topic/gamestate', function (message) {
-                    const gameState = JSON.parse(message.body);
-                    updateGameUI(gameState);
-                });
-            }, function (err) {
-                console.error('STOMP error', err);
+    function connect() {
+        const socket = new SockJS('/ws-uno');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            // Subscribe to public game state
+            stompClient.subscribe('/topic/game/' + token, function (message) {
+                const gameState = JSON.parse(message.body);
+                updateGameUI(gameState);
             });
-        }
-
-        function drawCard() {
-            if (!stompClient) return;
-            stompClient.send('/app/draw', {}, JSON.stringify({}));
-        }
-
-        function playCard(index, colour) {
-            if (!stompClient) return;
-            // if wild, show color picker and store index
-            if (/\bWILD\b/i.test(String(colour))) {
-                tempCardIndex = index;
-                document.getElementById("colorPicker").style.display = "block";
-                return;
-            }
-            stompClient.send('/app/play', {}, JSON.stringify({cardIndex: parseInt(index)}));
-        }
-
-        function chooseColor(color) {
-            document.getElementById("colorPicker").style.display = "none";
-            if (!stompClient || tempCardIndex === null) return;
-            stompClient.send('/app/play', {}, JSON.stringify({
-                cardIndex: parseInt(tempCardIndex),
-                wildColor: color
-            }));
-            tempCardIndex = null;
-        }
-
-        function declareUno() {
-            if (!stompClient) return;
-            stompClient.send('/app/uno', {}, JSON.stringify({}));
-        }
-
-        function updateGameUI(gameState) {
-            // update hand size
-            const handSizeEl = document.getElementById('handSize');
-            if (handSizeEl) handSizeEl.textContent = 'Hand Size - ' + (gameState.playerHand ? gameState.playerHand.length : 0);
-
-            // update discard card
-            const discardEl = document.getElementById('discardCard');
-            const discardValueEl = document.getElementById('discardValue');
-            if (gameState.discardCard && discardEl) {
-                const discardColour = gameState.discardCard.colour ? String(gameState.discardCard.colour) : '';
-                const topColour = /\bWILD\b/i.test(discardColour) ? (gameState.wildColour || 'black') : discardColour;
-                discardEl.style.setProperty('--card-colour', topColour);
-                if (discardValueEl) {
-                    const raw = String(gameState.discardCard.value || '').toUpperCase();
-                    discardValueEl.textContent = valueMap.hasOwnProperty(raw) ? valueMap[raw] : gameState.discardCard.value;
-                }
-            }
-
-            // rebuild hand
-            const container = document.getElementById('handContainer');
-            if (container) {
-                container.innerHTML = ''; // clear
-                if (Array.isArray(gameState.playerHand)) {
-                    gameState.playerHand.forEach((card, idx) => {
-                        const btn = document.createElement('button');
-                        btn.className = 'uno-card';
-                        btn.type = 'button';
-                        const cardColour = card && card.colour ? String(card.colour) : 'Black';
-                        const cssColour = /\bWILD\b/i.test(cardColour) ? 'black' : cardColour;
-                        btn.style.setProperty('--card-colour', cssColour);
-                        btn.style.setProperty('--i', idx);
-                        btn.dataset.index = idx;
-                        btn.dataset.colour = cardColour;
-                        btn.onclick = function () { playCard(this.dataset.index, this.dataset.colour); };
-
-                        const valDiv = document.createElement('div');
-                        valDiv.className = 'value';
-                        const raw = card && card.value ? String(card.value).toUpperCase() : '';
-                        valDiv.textContent = valueMap.hasOwnProperty(raw) ? valueMap[raw] : (card ? card.value : '');
-                        btn.appendChild(valDiv);
-                        const wrapper = document.createElement('div');
-                        wrapper.style.display = 'inline-block';
-                        wrapper.appendChild(btn);
-                        container.appendChild(wrapper);
-                    });
-                }
-            }
-
-            // UNO status and declare button visibility
-            const declareBtn = document.getElementById('declareButton');
-            const unoDeclared = !!gameState.hasUno;
-            const gameOver = !!gameState.gameOver;
-            const handLen = gameState.playerHand ? gameState.playerHand.length : 0;
-
-            // update UNO text
-            const unoStatus = document.getElementById('unoStatus');
-            const unoStatusNot = document.getElementById('unoStatusNot');
-            if (unoDeclared) {
-                if (unoStatus) unoStatus.style.display = '';
-                if (unoStatusNot) unoStatusNot.style.display = 'none';
-            } else {
-                if (unoStatus) unoStatus.style.display = 'none';
-                if (unoStatusNot) unoStatusNot.style.display = '';
-            }
-
-            if (declareBtn) {
-                if (!gameOver && handLen === 1 && !unoDeclared) {
-                    declareBtn.style.display = '';
-                } else {
-                    declareBtn.style.display = 'none';
-                }
-            }
-
-            // disable draw button when game over
-            const drawBtn = document.getElementById('drawButton');
-            if (drawBtn) drawBtn.disabled = gameOver;
-        }
-
-        // connect on load
-        window.addEventListener('load', function () {
-            connect();
-            // convert initially-rendered values to symbols
-            document.querySelectorAll('.hand .uno-card .value, .pile .uno-card.single .value').forEach(i => {
-                const text = i.textContent.trim().toUpperCase();
-                if (valueMap.hasOwnProperty(text)) i.textContent = valueMap[text];
+            // Subscribe to this player's hand
+            stompClient.subscribe('/topic/game/' + token + '/hand/' + playerId, function (message) {
+                const hand = JSON.parse(message.body);
+                // Could update hand-specific UI here if needed
             });
+        }, function (err) {
+            console.error('STOMP error', err);
         });
-    </script>
-    </body>
-    </html>
+    }
+
+    function drawCard() {
+        if (!stompClient) return;
+        stompClient.send('/app/game/draw', {}, JSON.stringify({
+            token: token,
+            playerId: playerId
+        }));
+    }
+
+    function playCard(index, colour) {
+        if (!stompClient) return;
+        // if wild, show color picker and store index
+        if (/\bWILD\b/i.test(String(colour))) {
+            tempCardIndex = index;
+            document.getElementById("colorPicker").style.display = "block";
+            return;
+        }
+        stompClient.send('/app/game/play', {}, JSON.stringify({
+            token: token,
+            playerId: playerId,
+            cardIndex: parseInt(index)
+        }));
+    }
+
+    function chooseColor(color) {
+        document.getElementById("colorPicker").style.display = "none";
+        const indexInput = document.getElementById("wildCardIndex");
+        const colorInput = document.getElementById("wildColor");
+        const playerInput = document.getElementById("wildPlayerId");
+        indexInput.value = window.tempCardIndex;
+        colorInput.value = color;
+        // playerInput is already set from server-side model (${playerId})
+        document.getElementById("wildForm").submit();
+    }
+
+    function declareUno() {
+        if (!stompClient) return;
+        stompClient.send('/app/game/uno', {}, JSON.stringify({
+            token: token,
+            playerId: playerId
+        }));
+    }
+
+    function updateGameUI(gameState) {
+        // update hand size
+        const handSizeEl = document.getElementById('handSize');
+        if (handSizeEl) handSizeEl.textContent = 'Hand Size - ' + (gameState.playerHand ? gameState.playerHand.length : 0);
+
+        // update discard card
+        const discardEl = document.getElementById('discardCard');
+        const discardValueEl = document.getElementById('discardValue');
+        if (gameState.discardCard && discardEl) {
+            const discardColour = gameState.discardCard.colour ? String(gameState.discardCard.colour) : '';
+            const topColour = /\bWILD\b/i.test(discardColour) ? (gameState.wildColour || 'black') : discardColour;
+            discardEl.style.setProperty('--card-colour', topColour);
+            if (discardValueEl) {
+                const raw = String(gameState.discardCard.value || '').toUpperCase();
+                discardValueEl.textContent = valueMap.hasOwnProperty(raw) ? valueMap[raw] : gameState.discardCard.value;
+            }
+        }
+
+        // rebuild hand
+        const container = document.getElementById('handContainer');
+        if (container) {
+            container.innerHTML = ''; // clear
+            if (Array.isArray(gameState.playerHand)) {
+                gameState.playerHand.forEach((card, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'uno-card';
+                    btn.type = 'button';
+                    const cardColour = card && card.colour ? String(card.colour) : 'Black';
+                    const cssColour = /\bWILD\b/i.test(cardColour) ? 'black' : cardColour;
+                    btn.style.setProperty('--card-colour', cssColour);
+                    btn.style.setProperty('--i', idx);
+                    btn.dataset.index = idx;
+                    btn.dataset.colour = cardColour;
+                    btn.onclick = function () { playCard(this.dataset.index, this.dataset.colour); };
+
+                    const valDiv = document.createElement('div');
+                    valDiv.className = 'value';
+                    const raw = card && card.value ? String(card.value).toUpperCase() : '';
+                    valDiv.textContent = valueMap.hasOwnProperty(raw) ? valueMap[raw] : (card ? card.value : '');
+                    btn.appendChild(valDiv);
+                    const wrapper = document.createElement('div');
+                    wrapper.style.display = 'inline-block';
+                    wrapper.appendChild(btn);
+                    container.appendChild(wrapper);
+                });
+            }
+        }
+
+        // UNO status and declare button visibility
+        const declareBtn = document.getElementById('declareButton');
+        const unoDeclared = !!gameState.hasUno;
+        const gameOver = !!gameState.gameOver;
+        const handLen = gameState.playerHand ? gameState.playerHand.length : 0;
+
+        // update UNO text
+        const unoStatus = document.getElementById('unoStatus');
+        const unoStatusNot = document.getElementById('unoStatusNot');
+        if (unoDeclared) {
+            if (unoStatus) unoStatus.style.display = '';
+            if (unoStatusNot) unoStatusNot.style.display = 'none';
+        } else {
+            if (unoStatus) unoStatus.style.display = 'none';
+            if (unoStatusNot) unoStatusNot.style.display = '';
+        }
+
+        if (declareBtn) {
+            if (!gameOver && handLen === 1 && !unoDeclared) {
+                declareBtn.style.display = '';
+            } else {
+                declareBtn.style.display = 'none';
+            }
+        }
+
+        // disable draw button when game over
+        const drawBtn = document.getElementById('drawButton');
+        if (drawBtn) drawBtn.disabled = gameOver;
+    }
+
+    // connect on load
+    window.addEventListener('load', function () {
+        connect();
+        // convert initially-rendered values to symbols
+        document.querySelectorAll('.hand .uno-card .value, .pile .uno-card.single .value').forEach(i => {
+            const text = i.textContent.trim().toUpperCase();
+            if (valueMap.hasOwnProperty(text)) i.textContent = valueMap[text];
+        });
+    });
+</script>
+</body>
+</html>

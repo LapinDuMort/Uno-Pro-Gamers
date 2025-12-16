@@ -41,10 +41,20 @@ public class LobbyWebSocketController {
 
     @MessageMapping("/lobby/start")
     public void start(StartGameRequestDTO requestDTO) {
-        LobbySnapshot snap = lobbyService.startGame(requestDTO.getToken());
-        messagingTemplate.convertAndSend("/topic/lobby", snap);
-        multiplayerGameService.startFromLobby(requestDTO.getToken());
-        messagingTemplate.convertAndSend("/topic/game/events", "STARTED");
+        System.out.println("=== LobbyWebSocketController.start() called with token: " + requestDTO.getToken());
+        try {
+            LobbySnapshot snap = lobbyService.startGame(requestDTO.getToken());
+            messagingTemplate.convertAndSend("/topic/lobby", snap);
+            System.out.println("=== Starting multiplayer game from lobby");
+            multiplayerGameService.startFromLobby(requestDTO.getToken());
+            System.out.println("=== Publishing STARTED event to /topic/game/events");
+            messagingTemplate.convertAndSend("/topic/game/events", "STARTED");
+            System.out.println("=== STARTED event published");
+        } catch (Exception e) {
+            System.out.println("=== ERROR in start(): " + e.getMessage());
+            e.printStackTrace();
+            messagingTemplate.convertAndSend("/topic/errors", "Failed to start game: " + e.getMessage());
+        }
     }
 
     @MessageMapping("/lobby/status")

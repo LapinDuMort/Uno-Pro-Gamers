@@ -18,20 +18,36 @@ public class GameWebSocketController {
 
     @MessageMapping("/game/play")
     public void play(PlayCardRequestDTO dto) throws Exception {
-        gameService.playCard(dto.getPlayerId(), dto.getCardIndex(), dto.getWildColour());
-        publish(dto.getToken());
+        try {
+            gameService.playCard(dto.getPlayerId(), dto.getCardIndex(), dto.getWildColour());
+            publish(dto.getToken());
+        } catch (Exception e) {
+            System.err.println("Play card error for " + dto.getPlayerId() + ": " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @MessageMapping("/game/draw")
     public void draw(DrawCardRequestDTO dto) {
-        gameService.drawCard(dto.getPlayerId());
-        publish(dto.getToken());
+        try {
+            gameService.drawCard(dto.getPlayerId());
+            publish(dto.getToken());
+        } catch (Exception e) {
+            System.err.println("Draw card error for " + dto.getPlayerId() + ": " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @MessageMapping("/game/uno")
     public void uno(DeclareUnoRequestDTO dto) {
-        gameService.declareUno(dto.getPlayerId());
-        publish(dto.getToken());
+        try {
+            gameService.declareUno(dto.getPlayerId());
+            publish(dto.getToken());
+        } catch (Exception e) {
+            System.err.println("Declare uno error for " + dto.getPlayerId() + ": " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void publish(String token) {
