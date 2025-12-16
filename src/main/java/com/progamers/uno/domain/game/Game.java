@@ -1,6 +1,6 @@
 package com.progamers.uno.domain.game;
 
-import com.progamers.uno.domain.player.Player;
+import com.progamers.uno.domain.Player;
 import com.progamers.uno.domain.cards.Card;
 import com.progamers.uno.domain.cards.Deck;
 import com.progamers.uno.domain.cards.factory.DeckFactory;
@@ -41,5 +41,22 @@ public class Game {
     //isValidMove compares value and colour to check move legality, and if selectedCard is a Wild type
     public boolean isValidMove(DiscardPile Pile, Card selectedCard){
         return ValidityChecker.isValid(Pile, selectedCard);
+    }
+
+    public int incrementTurn(int turnTracker, int numberOfPlayers, boolean isReverse) {
+        if(isReverse) {
+            if(turnTracker == 1) {
+                return numberOfPlayers;
+            }
+            else{
+                return turnTracker - 1;
+            }
+        }
+        else if (turnTracker == numberOfPlayers) {
+            return 1;
+        }
+        else {
+            return turnTracker + 1;
+        }
     }
 }

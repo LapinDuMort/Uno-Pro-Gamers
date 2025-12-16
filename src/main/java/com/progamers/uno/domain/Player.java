@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 @Getter
 @Setter
@@ -15,11 +16,15 @@ public class Player {
     private Boolean hasUno;
     private ArrayList<Card> playerHand;
     private int currentSelected;
+    private int playerNumber;
+    private String playerName;
 
-    public Player() {
+    public Player(int playerNumber, String playerName) {
         this.hasUno = false;
         this.playerHand = new ArrayList<Card>();
         this.currentSelected = 0;
+        this.playerNumber = playerNumber;
+        this.playerName = playerName;
     }
     public Card getCurrentSelectedCard(int index) throws Exception {
         // Check if the player's hand is empty
@@ -62,21 +67,13 @@ public class Player {
         }
     }
 
-    public void DeclareUno() {
-        // Implementation for declaring UNO
-        if (playerHand.size() == 1)
-        {
-            hasUno = true;
-        }
-        else
-        {
-            hasUno = false;
-        }
-    }
-
     @Override
     public String toString() {
         return "Player" + "playerHand=" + playerHand + ", currentSelected=" + currentSelected + '}';
+    }
+
+    public void handSort(){
+        Collections.sort(this.playerHand, new cardComparator());
     }
 
     public void showHand() {
@@ -87,5 +84,24 @@ public class Player {
 
     public int getHandSize() {
         return playerHand.size();
+    }
+
+    public void declareUno() {
+// Implementation for declaring UNO
+        if (playerHand.size() == 2)
+        {
+            hasUno = true;
+        }
+        else
+        {
+            hasUno = false;
+        }
+    }
+
+    class cardComparator implements java.util.Comparator<Card>{
+        @Override
+        public int compare(Card a, Card b){
+            return (a.getColour().colourNumber + a.getValue().valueNumber) - (b.getColour().colourNumber + b.getValue().valueNumber);
+        }
     }
 }

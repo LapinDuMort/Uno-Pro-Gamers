@@ -26,14 +26,7 @@ public class ValidityChecker {
         userInputColour.close();
         return number;
     }
-    //public static Colour pickColour(int userChoice) {
-//        if (userChoice == 1){return Colour.Red;}
-//        else if (userChoice == 2){return Colour.Blue;}
-//        else if (userChoice == 3){return Colour.Green;}
-//        else if (userChoice == 4){return Colour.Yellow;}
-//        else {System.out.println("Invalid colour");}
-//        return Colour.Wild;
-//}
+
     public static List<Card> validCardList(List<Card> currentHand, DiscardPile Pile){
         List<Card> validCards = new ArrayList<>();
         for (Card card : currentHand){

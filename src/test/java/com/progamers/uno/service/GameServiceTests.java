@@ -4,7 +4,7 @@ import com.progamers.uno.domain.cards.Card;
 import com.progamers.uno.domain.cards.Colour;
 import com.progamers.uno.domain.cards.Value;
 import com.progamers.uno.domain.game.Game;
-import com.progamers.uno.domain.player.Player;
+import com.progamers.uno.domain.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +20,7 @@ public class GameServiceTests {
     void setup() {
         gameService = new GameService();
         game = gameService.getGame();
-        player = gameService.getPlayer();
+        player = gameService.getActivePlayer();
     }
 
     /**

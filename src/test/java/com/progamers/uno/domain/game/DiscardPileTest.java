@@ -1,6 +1,6 @@
 package com.progamers.uno.domain.game;
 
-import com.progamers.uno.domain.player.Player;
+import com.progamers.uno.domain.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +14,7 @@ public class DiscardPileTest {
     @BeforeEach
     void setup(){
         game = new Game();
-        player = new Player();
+        player = new Player(1,"Aryn");
         testDiscardPile = new DiscardPile();
     }
 

@@ -1,6 +1,6 @@
 package com.progamers.uno.domain.game;
 
-import com.progamers.uno.domain.player.Player;
+import com.progamers.uno.domain.Player;
 import com.progamers.uno.domain.cards.Card;
 import com.progamers.uno.domain.cards.Colour;
 import com.progamers.uno.domain.cards.Deck;
@@ -18,7 +18,7 @@ public class GameTests {
     @BeforeEach
     void setup() {
         game = new Game();
-        player = new Player();
+        player = new Player(1,"Aryn");
     }
 
     @Test

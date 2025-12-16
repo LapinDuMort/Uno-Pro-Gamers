@@ -1,6 +1,5 @@
 package com.progamers.uno.controller;
 
-import com.progamers.uno.domain.player.Player;
 import com.progamers.uno.service.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -37,18 +36,9 @@ public class GameController {
         model.addAttribute("wildColour", gameService.checkTopDiscardWild());
         model.addAttribute("gameOver", gameService.isGameOver());
         model.addAttribute("hasUno", gameService.hasUno());
-
-
-        List<Player> players = List.of(
-                new Player("Aryn", 7,true),
-                new Player("Robyn", 7,false),
-                new Player("Jordan", 7,false),
-                new Player("Blake", 7,true),
-                new Player("Tina",7,false)
-        );
-
-        model.addAttribute("players", players);
-        model.addAttribute("ActivePlayer", "Tina");
+        model.addAttribute("isReversed", gameService.isReverse());
+        model.addAttribute("players", gameService.getPlayerList());
+        model.addAttribute("activePlayer", gameService.getActivePlayer());
         return "UnoPlayerPage";
     }
 
@@ -79,6 +69,8 @@ public class GameController {
         if (gameService.isGameOver()) {
             return new RedirectView("/gameover");
         }
+        System.out.println(gameService.getActivePlayer().getHasUno());
+        System.out.println(gameService.getActivePlayer());
         gameService.declareUno();
         return new RedirectView("/playerpage");
     }

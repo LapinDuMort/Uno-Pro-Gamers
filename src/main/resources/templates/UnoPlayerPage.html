@@ -11,23 +11,33 @@
     <body>
     <div class="player-list">
         <h2>Players</h2>
+
+        <h2 th:text="${isReversed} ? 'Turn Order: 🔄 Reversed' : 'Turn Order: ▶️ Normal'"></h2>
         <ul>
             <li th:each="player : ${players}"
-                th:classappend="${player.name == ActivePlayer} ? 'active-player'">
-                <span class="player-name" th:text="${player.name}"></span>
-                <span class="player-cards"
-                      th:text="'(' + ${player.CardsInHand} + ' cards)'"></span>
-                <span th:if="${hasUno}" class="uno-warning-inline">UNO!</span>
+                th:with="handSize=${player.handSize}"
+                th:classappend="${player == activePlayer ? ' active-player' : ''}">
+
+            <span class="player-name"
+                  th:text="${player.playerName}"></span>
+
+                <span class="player-cards" th:text="${player.handSize} + ' cards'"></span>
+
+                <span th:if="${player.hasUno}"
+                      class="uno-warning-inline">UNO!</span>
+
                 <div class="uno-controls">
-                    <form th:if="${!gameOver and !hasUno}"
+                    <form th:if="${!gameOver and !player.hasUno and player == activePlayer}"
                           th:action="@{/uno}"
                           method="post">
+
                         <button type="submit"
                                 class="uno-button"
-                                th:disabled="${#lists.size(playerHand) > 1}">UNO!
+                                th:disabled="${player.handSize > 2}">
+                            UNO!
                         </button>
                     </form>
-
+                </div>
             </li>
         </ul>
     </div>
@@ -54,10 +64,6 @@
     <h1>Your Hand</h1>
     </div>
     <div class="hand" id="hand-container">
-<!--         th:with="cardCount=${playerHand.size()}"-->
-<!--         th:style="|&#45;&#45;total-cards:${cardCount};-->
-<!--             &#45;&#45;spacing-unit: ${cardCount > 1 ?#numbers.formatDecimal( (90 * 10 - 110) / (cardCount - 1), 0, 2) + 'vw / 10' :'0px'};|">-->
-
         <form th:each="card, iter : ${playerHand}"
               th:id="'playForm' + ${iter.index}"
               th:action="@{/play}"

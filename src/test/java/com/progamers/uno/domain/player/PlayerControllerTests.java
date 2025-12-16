@@ -1,5 +1,6 @@
 package com.progamers.uno.domain.player;
 
+import com.progamers.uno.domain.Player;
 import com.progamers.uno.domain.cards.Card;
 import com.progamers.uno.domain.cards.Colour;
 import com.progamers.uno.domain.cards.Value;
@@ -13,7 +14,7 @@ class PlayerControllerTests {
 
     @BeforeEach
     void setUp() {
-        player = new Player();
+        player = new Player(1,"Aryn");
     }
 
     @Test
