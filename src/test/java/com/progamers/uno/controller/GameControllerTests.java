@@ -18,6 +18,14 @@
  import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
  import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+ /**
+  * Test suite for {@link GameController}
+  * Tests are mostly corrected versions of the original GameControllerTest class
+  * There are some new AI generated tests cases to improve coverage,
+  * particularly around playerId validation.
+  * NOTE: AI generated tests should be reviewed for correctness
+  * Coverage is 100% of lines and ~96% of branches
+  */
  @WebMvcTest(GameController.class)
  public class GameControllerTests {
 
@@ -60,6 +68,20 @@
          verifyNoMoreInteractions(gameService);
      }
 
+     @Test
+     void testPlayerPage_whenPlayerIdMissing_thenRedirectsToPlayerPageWithNewID() throws Exception {
+         String location = mockMvc.perform(get("/playerpage"))
+                 .andExpect(status().is3xxRedirection())
+                 .andReturn()
+                 .getResponse()
+                 .getRedirectedUrl();
+
+         org.junit.jupiter.api.Assertions.assertNotNull(location);
+         org.junit.jupiter.api.Assertions.assertTrue(location.startsWith("/playerpage?playerId="));
+
+         verifyNoInteractions(gameService);
+     }
+
      /* --- POST /draw --- */
 
      @Test
@@ -86,6 +108,48 @@
                  .andExpect(redirectedUrl("/gameover?playerId=" + PLAYER_ID));
 
          verify(gameService).isGameOver();
+         verifyNoMoreInteractions(gameService);
+     }
+
+     @Test
+     void testDraw_whenPlayerIdNull_thenGeneratesPlayerIdAndDrawsCardAndRedirects() throws Exception {
+         when(gameService.isGameOver()).thenReturn(false);
+
+         String location = mockMvc.perform(post("/draw")) // no playerId param => null
+                 .andExpect(status().is3xxRedirection())
+                 .andReturn()
+                 .getResponse()
+                 .getRedirectedUrl();
+
+         org.junit.jupiter.api.Assertions.assertNotNull(location);
+         org.junit.jupiter.api.Assertions.assertTrue(location.startsWith("/playerpage?playerId="));
+
+         String generatedId = location.substring("/playerpage?playerId=".length());
+         java.util.UUID.fromString(generatedId); // validates it's a UUID
+
+         verify(gameService).isGameOver();
+         verify(gameService).drawCard(generatedId);
+         verifyNoMoreInteractions(gameService);
+     }
+
+     @Test
+     void testDraw_whenPlayerIdInvalid_thenGeneratesPlayerIdAndDrawsCardAndRedirects() throws Exception {
+         when(gameService.isGameOver()).thenReturn(false);
+
+         String location = mockMvc.perform(post("/draw").param("playerId", "   ")) // blank
+                 .andExpect(status().is3xxRedirection())
+                 .andReturn()
+                 .getResponse()
+                 .getRedirectedUrl();
+
+         org.junit.jupiter.api.Assertions.assertNotNull(location);
+         org.junit.jupiter.api.Assertions.assertTrue(location.startsWith("/playerpage?playerId="));
+
+         String generatedId = location.substring("/playerpage?playerId=".length());
+         java.util.UUID.fromString(generatedId);
+
+         verify(gameService).isGameOver();
+         verify(gameService).drawCard(generatedId);
          verifyNoMoreInteractions(gameService);
      }
 
@@ -137,6 +201,50 @@
          verifyNoMoreInteractions(gameService);
      }
 
+     @Test
+     void testPlay_whenPlayerIdMissing_thenGeneratesPlayerId_playsCard_andRedirectsWithPlayerId() throws Exception {
+         when(gameService.isGameOver()).thenReturn(false);
+
+         String location = mockMvc.perform(post("/play").param("cardIndex", "0")) // no playerId param => null
+                 .andExpect(status().is3xxRedirection())
+                 .andReturn()
+                 .getResponse()
+                 .getRedirectedUrl();
+
+         org.junit.jupiter.api.Assertions.assertNotNull(location);
+         org.junit.jupiter.api.Assertions.assertTrue(location.startsWith("/playerpage?playerId="));
+
+         String generatedId = location.substring("/playerpage?playerId=".length());
+         java.util.UUID.fromString(generatedId); // validates it's a UUID
+
+         verify(gameService).playCard(generatedId, 0, null);
+         verify(gameService).isGameOver();
+         verifyNoMoreInteractions(gameService);
+     }
+
+     @Test
+     void testPlay_whenPlayerIdBlank_thenGeneratesPlayerId_playsCard_andRedirectsWithPlayerId() throws Exception {
+         when(gameService.isGameOver()).thenReturn(false);
+
+         String location = mockMvc.perform(post("/play")
+                         .param("playerId", "   ") // blank
+                         .param("cardIndex", "0"))
+                 .andExpect(status().is3xxRedirection())
+                 .andReturn()
+                 .getResponse()
+                 .getRedirectedUrl();
+
+         org.junit.jupiter.api.Assertions.assertNotNull(location);
+         org.junit.jupiter.api.Assertions.assertTrue(location.startsWith("/playerpage?playerId="));
+
+         String generatedId = location.substring("/playerpage?playerId=".length());
+         java.util.UUID.fromString(generatedId);
+
+         verify(gameService).playCard(generatedId, 0, null);
+         verify(gameService).isGameOver();
+         verifyNoMoreInteractions(gameService);
+     }
+
      /* --- POST /uno --- */
 
      @Test
@@ -167,6 +275,60 @@
          verifyNoMoreInteractions(gameService);
      }
 
+     @Test
+     void testUno_whenPlayerIdMissing_thenGeneratesPlayerId_declaresUno_andRedirectsWithPlayerId() throws Exception {
+         when(gameService.isGameOver()).thenReturn(false);
+
+         String location = mockMvc.perform(post("/uno")) // playerId == null
+                 .andExpect(status().is3xxRedirection())
+                 .andReturn()
+                 .getResponse()
+                 .getRedirectedUrl();
+
+         org.junit.jupiter.api.Assertions.assertNotNull(location);
+         org.junit.jupiter.api.Assertions.assertTrue(location.startsWith("/playerpage?playerId="));
+
+         String generatedId = location.substring("/playerpage?playerId=".length());
+         java.util.UUID.fromString(generatedId); // validate UUID
+
+         verify(gameService).isGameOver();
+         verify(gameService).declareUno(generatedId);
+         verifyNoMoreInteractions(gameService);
+     }
+
+     @Test
+     void testUno_whenPlayerIdBlank_thenGeneratesPlayerId_declaresUno_andRedirectsWithPlayerId() throws Exception {
+         when(gameService.isGameOver()).thenReturn(false);
+
+         String location = mockMvc.perform(post("/uno")
+                         .param("playerId", "   ")) // blank
+                 .andExpect(status().is3xxRedirection())
+                 .andReturn()
+                 .getResponse()
+                 .getRedirectedUrl();
+
+         org.junit.jupiter.api.Assertions.assertNotNull(location);
+         org.junit.jupiter.api.Assertions.assertTrue(location.startsWith("/playerpage?playerId="));
+
+         String generatedId = location.substring("/playerpage?playerId=".length());
+         java.util.UUID.fromString(generatedId);
+
+         verify(gameService).isGameOver();
+         verify(gameService).declareUno(generatedId);
+         verifyNoMoreInteractions(gameService);
+     }
+
+     /* --- GET /game --- */
+
+     @Test
+     void testGame_whenRequested_thenRendersGameView() throws Exception {
+         mockMvc.perform(get("/game"))
+                 .andExpect(status().isOk())
+                 .andExpect(view().name("game/game"));
+
+         verifyNoInteractions(gameService);
+     }
+
      /* --- GET /gameover --- */
 
      @Test
@@ -187,4 +349,63 @@
                  .andExpect(model().attribute("gameOver", is(true)));
 
      }
+
+     @Test
+     void testGameOver_whenPlayerIdMissing_thenGeneratesPlayerId_andCallsServiceWithIt() throws Exception {
+         List<Card> hand = Collections.emptyList();
+         Card topDiscard = mock(Card.class);
+
+         when(gameService.getTopDiscard()).thenReturn(topDiscard);
+         when(gameService.isGameOver()).thenReturn(true);
+         // return hand for any generated id
+         when(gameService.getPlayerHand(anyString())).thenReturn(hand);
+
+         var result = mockMvc.perform(get("/gameover")) // playerId == null
+                 .andExpect(status().isOk())
+                 .andExpect(view().name("GameOver"))
+                 .andExpect(model().attribute("discardCard", sameInstance(topDiscard)))
+                 .andExpect(model().attribute("gameOver", is(true)))
+                 .andExpect(model().attributeExists("playerId"))
+                 .andExpect(model().attribute("playerHand", sameInstance(hand)))
+                 .andReturn();
+
+         String generatedId = (String) result.getModelAndView().getModel().get("playerId");
+         org.junit.jupiter.api.Assertions.assertNotNull(generatedId);
+         java.util.UUID.fromString(generatedId);
+
+         verify(gameService).getPlayerHand(generatedId);
+         verify(gameService).getTopDiscard();
+         verify(gameService).isGameOver();
+         verifyNoMoreInteractions(gameService);
+     }
+
+     @Test
+     void testGameOver_whenPlayerIdBlank_thenGeneratesPlayerId_andCallsServiceWithIt() throws Exception {
+         List<Card> hand = Collections.emptyList();
+         Card topDiscard = mock(Card.class);
+
+         when(gameService.getTopDiscard()).thenReturn(topDiscard);
+         when(gameService.isGameOver()).thenReturn(true);
+         when(gameService.getPlayerHand(anyString())).thenReturn(hand);
+
+         var result = mockMvc.perform(get("/gameover").param("playerId", "   ")) // blank
+                 .andExpect(status().isOk())
+                 .andExpect(view().name("GameOver"))
+                 .andExpect(model().attribute("discardCard", sameInstance(topDiscard)))
+                 .andExpect(model().attribute("gameOver", is(true)))
+                 .andExpect(model().attributeExists("playerId"))
+                 .andExpect(model().attribute("playerHand", sameInstance(hand)))
+                 .andReturn();
+
+         String generatedId = (String) result.getModelAndView().getModel().get("playerId");
+         org.junit.jupiter.api.Assertions.assertNotNull(generatedId);
+         java.util.UUID.fromString(generatedId);
+
+         verify(gameService).getPlayerHand(generatedId);
+         verify(gameService).getTopDiscard();
+         verify(gameService).isGameOver();
+         verifyNoMoreInteractions(gameService);
+     }
+
+
  }
