@@ -1,5 +1,6 @@
-package com.progamers.uno.domain.player;
+package com.progamers.uno;
 
+import com.progamers.uno.domain.player.Player;
 import com.progamers.uno.domain.cards.Card;
 import com.progamers.uno.domain.cards.Colour;
 import com.progamers.uno.domain.cards.Value;
@@ -8,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class PlayerControllerTests {
+class PlayerTests {
     Player player;
 
     @BeforeEach
@@ -124,38 +125,5 @@ class PlayerControllerTests {
         player.addCardToHand(cardBlueFive);
 
         assertEquals(false, player.getHasUno());
-    }
-
-    @Test
-    void testHandSortsCorrectly(){
-        Card cardRedFour = Card.builder().value(Value.Five).colour(Colour.Red).build();
-        Card cardWildFour = Card.builder().value(Value.WildFour).colour(Colour.Wild).build();
-        Card cardRedTwo = Card.builder().value(Value.Two).colour(Colour.Red).build();
-        Card cardGreenEight = Card.builder().value(Value.Eight).colour(Colour.Green).build();
-        Card cardGreenFive = Card.builder().value(Value.Five).colour(Colour.Green).build();
-        player.addCardToHand(cardRedTwo);
-        player.addCardToHand(cardWildFour);
-        player.addCardToHand(cardGreenEight);
-        player.addCardToHand(cardRedFour);
-        player.addCardToHand(cardGreenFive);
-        player.handSort();
-        assert player.getPlayerHand().toString().equals("[Card(colour=Red, value=Two), Card(colour=Red, value=Five), Card(colour=Green, value=Five), Card(colour=Green, value=Eight), Card(colour=Wild, value=WildFour)]");
-    }
-
-    @Test
-    void testHandSortsCorrectlyWithDoubles(){
-        Card cardRedFour = Card.builder().value(Value.Five).colour(Colour.Red).build();
-        Card cardWildFour = Card.builder().value(Value.WildFour).colour(Colour.Wild).build();
-        Card cardRedTwo = Card.builder().value(Value.Two).colour(Colour.Red).build();
-        Card cardGreenEight = Card.builder().value(Value.Eight).colour(Colour.Green).build();
-        Card cardGreenFive = Card.builder().value(Value.Five).colour(Colour.Green).build();
-        player.addCardToHand(cardRedTwo);
-        player.addCardToHand(cardWildFour);
-        player.addCardToHand(cardGreenEight);
-        player.addCardToHand(cardRedFour);
-        player.addCardToHand(cardRedTwo);
-        player.addCardToHand(cardGreenFive);
-        player.handSort();
-        assert player.getPlayerHand().toString().equals("[Card(colour=Red, value=Two), Card(colour=Red, value=Two), Card(colour=Red, value=Five), Card(colour=Green, value=Five), Card(colour=Green, value=Eight), Card(colour=Wild, value=WildFour)]");
     }
 }

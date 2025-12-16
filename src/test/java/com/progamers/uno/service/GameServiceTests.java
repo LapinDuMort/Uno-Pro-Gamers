@@ -20,7 +20,7 @@ public class GameServiceTests {
     void setup() {
         gameService = new GameService();
         game = gameService.getGame();
-        player = gameService.getPlayer();
+        player = gameService.getActivePlayer();
     }
 
     /**
