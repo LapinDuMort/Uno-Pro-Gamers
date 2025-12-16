@@ -8,17 +8,24 @@ import lombok.Getter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Scanner;
 
 @Service
 @Getter
 public class GameService {
 
     private final Game game;
-    private final Player player;
     private boolean gameOver;
     private boolean isReverse;
+    private int turnTracker;
+    private int numberOfPlayers;
+    private List<Player> playerList;
+    private Player activePlayer;
+    private Player playerOne;
+    private Player playerTwo;
 
     public GameService() {
         this.game = new Game();
@@ -26,13 +33,62 @@ public class GameService {
         this.game.getDiscardPile().addToPile(
                 this.game.getCardDeck().drawCard()
         );
-        this.player = new Player();
-        this.game.drawCards(this.player, 7);
         this.isReverse = false;
+        this.activePlayer = null;
+        this.turnTracker = 1;
+        //currently set to 1, but will adapt to game size later
+        this.numberOfPlayers = 1;
+        this.playerList = new ArrayList<>();
+        this.playerOne = new Player(1, "test1");
+        this.playerTwo = new Player(2, "test2");
+        this.playerList.add(this.playerOne);
+        this.playerList.add(this.playerTwo);
+        whoseTurn();
+        dealStartingHands();
+    }
+
+    public void addPlayers(Player player){
+        this.playerList.add(player);
+    }
+
+    public void whoseTurn(){
+        for(Player player : this.playerList){
+            if(this.turnTracker == player.getPlayerNumber()){
+                this.activePlayer = player;
+            }
+        }
+    }
+
+    public void playerSelect() {
+        Scanner scanner = new Scanner(System.in);
+        int playersInGame;
+        while (true) {
+            System.out.println("Select number of players (2-8): ");
+            playersInGame = scanner.nextInt();
+            if (playersInGame >= 2 && playersInGame <= 8) {
+                break;
+            }
+        }
+        for (int i = 1; i <= playersInGame; i++) {
+
+            String playerName;
+            Scanner nameScanner = new Scanner(System.in);
+            System.out.println("Enter player " + (i) + "'s name: ");
+            playerName = nameScanner.next();
+            Player player = new Player(i, playerName);
+            addPlayers(player);
+        }
+        whoseTurn();
+        this.numberOfPlayers = playersInGame;
+    }
+    public void dealStartingHands(){
+        for(Player player : this.playerList){
+            this.game.drawCards(player, 7);
+        }
     }
 
     public List<Card> getPlayerHand() {
-        return this.player.getPlayerHand();
+        return this.activePlayer.getPlayerHand();
     }
 
     public Card getTopDiscard() {
@@ -40,16 +96,18 @@ public class GameService {
     }
 
     public boolean hasUno() {
-        return this.player.getHasUno();
+        return this.activePlayer.getHasUno();
     }
 
     public void declareUno() {
-        this.player.declareUno();
+        this.activePlayer.declareUno();
     }
 
     public void drawCard() {
         if (gameOver) return;
-        this.game.drawCards(this.player, 1);
+        this.game.drawCards(this.activePlayer, 1);
+        this.turnTracker = this.game.incrementTurn(this.turnTracker, this.numberOfPlayers, this.isReverse);
+        whoseTurn();
     }
 
 
@@ -72,37 +130,40 @@ public class GameService {
     public void playCard(int index) throws Exception {
         if (gameOver) return;
 
-        Card selectedCard = this.player.getCurrentSelectedCard(index);
+        Card selectedCard = this.activePlayer.getCurrentSelectedCard(index);
         Card topCard = this.game.getDiscardPile().getTopCard();
 
         if (!this.game.isValidMove(topCard, selectedCard)) return;
 
-        if (player.getHandSize() == 1 && !this.player.getHasUno()) {
-            this.game.drawCards(this.player, 2);
+        if (activePlayer.getHandSize() == 1 && !this.activePlayer.getHasUno()) {
+            this.game.drawCards(this.activePlayer, 2);
             return;
         }
 
         this.game.getDiscardPile().addToPile(
-                this.player.playCard(index));
+                this.activePlayer.playCard(index));
+
+        this.turnTracker = this.game.incrementTurn(this.turnTracker, this.numberOfPlayers, this.isReverse);
+        whoseTurn();
 
         checkSpecialCard(selectedCard);
 
-        if (this.player.getHandSize() == 0) {
+        if (this.activePlayer.getHandSize() == 0) {
             this.gameOver = true;
         }
     }
     public void checkSpecialCard(Card selectedCard) {
         //checking for SpecialCards functions
         if(SpecialCards.checkForDraw(selectedCard.getValue()) == 4){
-            this.game.drawCards(this.player, 4);
-            //TODO Increment turn order
+            this.game.drawCards(this.activePlayer, 4);
+            this.turnTracker = this.game.incrementTurn(this.turnTracker, this.numberOfPlayers, this.isReverse);
         }
         else if (SpecialCards.checkForDraw(selectedCard.getValue()) == 2){
-            this.game.drawCards(this.player, 2);
-            //TODO Increment turn order
+            this.game.drawCards(this.activePlayer, 2);
+            this.turnTracker = this.game.incrementTurn(this.turnTracker, this.numberOfPlayers, this.isReverse);
         }
         else if (SpecialCards.checkForSkip(selectedCard.getValue())){
-            //TODO Increment turn order
+            this.turnTracker = this.game.incrementTurn(this.turnTracker, this.numberOfPlayers, this.isReverse);
         }
         this.isReverse = SpecialCards.checkForReverse(selectedCard.getValue(), this.isReverse);
     }

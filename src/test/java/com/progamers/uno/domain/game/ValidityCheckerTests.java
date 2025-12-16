@@ -18,7 +18,7 @@ public class ValidityCheckerTests {
     @BeforeEach
     void setup() {
         game = new Game();
-        player = new Player();
+        player = new Player(1, "test");
         testDiscardPile = new DiscardPile();
     }
 

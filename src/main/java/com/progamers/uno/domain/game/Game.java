@@ -42,4 +42,21 @@ public class Game {
     public boolean isValidMove(Card topCard, Card selectedCard){
         return ValidityChecker.isValid(topCard, selectedCard);
     }
+
+    public int incrementTurn(int turnTracker, int numberOfPlayers, boolean isReverse) {
+        if(isReverse) {
+            if(turnTracker == 1) {
+                return numberOfPlayers;
+            }
+            else{
+                return turnTracker - 1;
+            }
+        }
+        else if (turnTracker == numberOfPlayers) {
+            return 1;
+        }
+        else {
+            return turnTracker + 1;
+        }
+    }
 }
