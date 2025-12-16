@@ -26,4 +26,14 @@ public class HomeControllerTests {
                 .andExpect(content().string(containsString("<h1>UNO!</h1>")));
 
     }
+
+    /* --- GET /lobby --- */
+
+    @Test
+    void testLobby_whenVisited_thenDisplaysLobbyPage() throws Exception {
+        mockMvc.perform(get("/lobby"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("lobby/index"))
+                .andExpect(content().string(containsString("<h2>UNO Lobby</h2>")));
+    }
 }
