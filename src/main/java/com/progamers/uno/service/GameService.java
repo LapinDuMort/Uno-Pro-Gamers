@@ -1,5 +1,6 @@
 package com.progamers.uno.service;
 
+import com.progamers.uno.domain.game.SpecialCards;
 import com.progamers.uno.domain.player.Player;
 import com.progamers.uno.domain.cards.Card;
 import com.progamers.uno.domain.game.Game;
@@ -11,13 +12,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Scanner;
 
 @Service
 @Getter
 public class GameService {
 
     private final Game game;
-    private final Player player;
     private boolean gameOver;
     private final Map<String, Player> players = new HashMap<>();
 
@@ -27,8 +28,59 @@ public class GameService {
         this.game.getDiscardPile().addToPile(
                 this.game.getCardDeck().drawCard()
         );
-        this.player = new Player();
-        this.game.drawCards(this.player, 7);
+        this.isReverse = false;
+        this.activePlayer = null;
+        this.turnTracker = 1;
+        //currently set to 1, but will adapt to game size later
+        this.numberOfPlayers = 1;
+        this.playerList = new ArrayList<>();
+        this.playerOne = new Player(1, "test1");
+        this.playerTwo = new Player(2, "test2");
+        this.playerList.add(this.playerOne);
+        this.playerList.add(this.playerTwo);
+        whoseTurn();
+        dealStartingHands();
+    }
+
+    public void addPlayers(Player player){
+        this.playerList.add(player);
+    }
+
+    public void whoseTurn(){
+        for(Player player : this.playerList){
+            if(this.turnTracker == player.getPlayerNumber()){
+                this.activePlayer = player;
+            }
+        }
+    }
+
+    public void playerSelect() {
+        Scanner scanner = new Scanner(System.in);
+        int playersInGame;
+        while (true) {
+            System.out.println("Select number of players (2-8): ");
+            playersInGame = scanner.nextInt();
+            if (playersInGame >= 2 && playersInGame <= 8) {
+                break;
+            }
+        }
+        for (int i = 1; i <= playersInGame; i++) {
+
+            String playerName;
+            Scanner nameScanner = new Scanner(System.in);
+            System.out.println("Enter player " + (i) + "'s name: ");
+            playerName = nameScanner.next();
+            Player player = new Player(i, playerName);
+            addPlayers(player);
+        }
+        whoseTurn();
+        this.numberOfPlayers = playersInGame;
+    }
+
+    public void dealStartingHands(){
+        for(Player player : this.playerList){
+            this.game.drawCards(player, 7);
+        }
     }
 
     private Player getOrCreatePlayer(String playerId) {
