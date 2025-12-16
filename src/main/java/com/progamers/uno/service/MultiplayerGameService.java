@@ -24,6 +24,7 @@ public class MultiplayerGameService {
     private final Map<String, String> playerNamesById = new LinkedHashMap<>();
     private final List<String> turnOrder = new ArrayList<>();
     private int currentTurnIndex = 0;
+    private int turnDirection = 1; // 1 for forward, -1 for reverse
 
     public MultiplayerGameService(LobbyService lobbyService) {
         this.lobbyService = lobbyService;
@@ -47,6 +48,7 @@ public class MultiplayerGameService {
         playerNamesById.clear();
         turnOrder.clear();
         currentTurnIndex = 0;
+        turnDirection = 1;
         gameOver = false;
 
         // Create per-player Player and deal 7 each
@@ -83,7 +85,7 @@ public class MultiplayerGameService {
     }
 
     private void advanceTurn() {
-        currentTurnIndex = (currentTurnIndex + 1) % turnOrder.size();
+        currentTurnIndex = (currentTurnIndex + turnDirection + turnOrder.size()) % turnOrder.size();
     }
 
     public synchronized java.util.List<String> getTurnOrder() {
@@ -172,6 +174,9 @@ public class MultiplayerGameService {
             game.drawCards(nextPlayer, 2);
             advanceTurn();
             return;
+        } else if (playedCard.getValue().equals(Value.Reverse)) {
+            // Reverse card: reverse the direction of play
+            turnDirection *= -1;
         }
 
         if (p.getHandSize() == 0) {
