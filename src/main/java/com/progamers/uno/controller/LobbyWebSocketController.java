@@ -47,6 +47,11 @@ public class LobbyWebSocketController {
             messagingTemplate.convertAndSend("/topic/lobby", snap);
             System.out.println("=== Starting multiplayer game from lobby");
             multiplayerGameService.startFromLobby(requestDTO.getToken());
+            
+            // Publish initial game state to all players
+            System.out.println("=== Publishing initial game state");
+            publishGameState(requestDTO.getToken());
+            
             System.out.println("=== Publishing STARTED event to /topic/game/events");
             messagingTemplate.convertAndSend("/topic/game/events", "STARTED");
             System.out.println("=== STARTED event published");
@@ -54,6 +59,22 @@ public class LobbyWebSocketController {
             System.out.println("=== ERROR in start(): " + e.getMessage());
             e.printStackTrace();
             messagingTemplate.convertAndSend("/topic/errors", "Failed to start game: " + e.getMessage());
+        }
+    }
+
+    private void publishGameState(String token) {
+        // public snapshot
+        messagingTemplate.convertAndSend(
+                "/topic/game/" + token,
+                multiplayerGameService.publicSnapshot()
+        );
+
+        // per-player hands
+        for (String playerId : multiplayerGameService.getTurnOrder()) {
+            messagingTemplate.convertAndSend(
+                    "/topic/game/" + token + "/hand/" + playerId,
+                    multiplayerGameService.getHand(playerId)
+            );
         }
     }
 

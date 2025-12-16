@@ -118,6 +118,13 @@ function connectGame() {
       log("ERROR: " + msg.body);
     });
 
+    // Request initial game state now that we're subscribed
+    log("Requesting initial game state...");
+    stompClient.send("/app/game/sync", {}, JSON.stringify({
+      token,
+      playerId
+    }));
+
   }, (err) => {
     log("STOMP error: " + err);
   });

@@ -50,6 +50,17 @@ public class GameWebSocketController {
         }
     }
 
+    @MessageMapping("/game/sync")
+    public void syncGameState(PlayCardRequestDTO dto) {
+        System.out.println("=== Client requesting game sync for token: " + dto.getToken() + ", playerId: " + dto.getPlayerId());
+        try {
+            publish(dto.getToken());
+        } catch (Exception e) {
+            System.err.println("Sync error: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     private void publish(String token) {
         // public snapshot
         messaging.convertAndSend(
