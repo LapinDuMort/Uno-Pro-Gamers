@@ -1,47 +1,52 @@
 package com.progamers.uno.controller;
 
-import com.progamers.uno.dto.PlayCardMessage;
-import com.progamers.uno.service.GameService;
-import com.progamers.uno.dto.GameStateDto;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.progamers.uno.domain.multiplayer.game.dto.DeclareUnoRequestDTO;
+import com.progamers.uno.domain.multiplayer.game.dto.DrawCardRequestDTO;
+import com.progamers.uno.domain.multiplayer.game.dto.PlayCardRequestDTO;
+import com.progamers.uno.service.MultiplayerGameService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 @Controller
+@RequiredArgsConstructor
 public class GameWebSocketController {
 
-    @Autowired
-    private GameService gameService;
+    private final MultiplayerGameService gameService;
+    private final SimpMessagingTemplate messaging;
 
-    @MessageMapping("/draw")
-    @SendTo("/topic/gamestate")
-    public GameStateDto drawCard() throws Exception {
-        gameService.drawCard();
-        return buildGameState();
+    @MessageMapping("/game/play")
+    public void play(PlayCardRequestDTO dto) throws Exception {
+        gameService.playCard(dto.getPlayerId(), dto.getCardIndex(), dto.getWildColour());
+        publish(dto.getToken());
     }
 
-    @MessageMapping("/play")
-    @SendTo("/topic/gamestate")
-    public GameStateDto playCard(PlayCardMessage message) throws Exception {
-        gameService.playCard(message.getCardIndex(), message.getWildColor());
-        return buildGameState();
+    @MessageMapping("/game/draw")
+    public void draw(DrawCardRequestDTO dto) {
+        gameService.drawCard(dto.getPlayerId());
+        publish(dto.getToken());
     }
 
-    @MessageMapping("/uno")
-    @SendTo("/topic/gamestate")
-    public GameStateDto declareUno() throws Exception {
-        gameService.declareUno();
-        return buildGameState();
+    @MessageMapping("/game/uno")
+    public void uno(DeclareUnoRequestDTO dto) {
+        gameService.declareUno(dto.getPlayerId());
+        publish(dto.getToken());
     }
 
-    private GameStateDto buildGameState() {
-        return GameStateDto.builder()
-                .playerHand(gameService.getPlayerHand())
-                .discardCard(gameService.getTopDiscard())
-                .wildColour(gameService.checkTopDiscardWild())
-                .gameOver(gameService.isGameOver())
-                .hasUno(gameService.hasUno())
-                .build();
+    private void publish(String token) {
+        // public snapshot
+        messaging.convertAndSend(
+                "/topic/game/" + token,
+                gameService.publicSnapshot()
+        );
+
+        // per-player hands (demo-safe)
+        for (String playerId : gameService.getTurnOrder()) {
+            messaging.convertAndSend(
+                    "/topic/game/" + token + "/hand/" + playerId,
+                    gameService.getHand(playerId)
+            );
+        }
     }
 }
