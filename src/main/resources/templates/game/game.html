@@ -1,55 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UNO Game</title>
-    <style>
-        body { font-family: sans-serif; }
-        button { padding: 6px 10px; margin-right: 6px; }
-        #hand button { margin: 4px 6px 4px 0; }
-        #log { margin-top:12px;border:1px solid #ccc;padding:10px;height:220px;overflow:auto;white-space:pre-wrap; }
-        .row { margin-top: 10px; }
-        .card { display: inline-block; padding: 6px 10px; border: 1px solid #ccc; margin: 4px 6px 4px 0; cursor: pointer; }
-        .muted { color: #666; font-size: 0.9em; }
-        ul { padding-left: 18px; }
-    </style>
+    <link rel="stylesheet" href="/css/globalstyle.css">
+    <link rel="stylesheet" href="/css/uno.css">
 </head>
 <body>
-
-<h2>UNO Game</h2>
-
-<div class="row">
-    <span class="muted">Token:</span> <span id="tokenLabel"></span> |
-    <span class="muted">Player:</span> <span id="playerLabel"></span>
+<h1>UNO Game</h1>
+<div class="game-board">
+    <div class="pile">
+        <h2>Draw Pile</h2>
+        <div class="uno-card single">?</div>
+        <button id="drawBtn" class="draw-button">Draw Card</button>
+    </div>
+    <div class="pile">
+        <h2>Discard Pile</h2>
+        <div id="discardCard" class="uno-card single">
+            <div id="discardValue" class="value">?</div>
+        </div>
+    </div>
 </div>
 
-<div class="row">
-    <b>Current Turn:</b> <span id="turnLabel">?</span>
+<h2>Your Hand</h2>
+<div style="text-align: center; margin: 15px 0;">
+    <button id="declareButton" class="draw-button" onclick="declareUno()">Declare UNO</button>
+</div>
+<div id="handSize">Hand Size - 0</div>
+<div id="handContainer" class="hand"></div>
+
+<!-- UNO declaration controls -->
+<div class="uno-controls">
+    <p id="unoStatus" style="display:none;">UNO declared!</p>
+    <p id="unoStatusNot">UNO not declared!</p>
 </div>
 
-<div class="row">
-    <b>Top Discard:</b> <span id="discardLabel">?</span>
-    &nbsp; | &nbsp;
-    <b>Wild Colour:</b> <span id="wildLabel">None</span>
+<!-- Wild card color picker popup -->
+<div id="colorPicker" class="color-popup" style="display:none;">
+    <h3>Pick a Color</h3>
+    <button type="button" onclick="chooseColor('Red')" style="background-color: #FF5252; color: white;">Red</button>
+    <button type="button" onclick="chooseColor('Yellow')" style="background-color: #FFD54F; color: black;">Yellow</button>
+    <button type="button" onclick="chooseColor('Green')" style="background-color: #66BB6A; color: white;">Green</button>
+    <button type="button" onclick="chooseColor('Blue')" style="background-color: #42A5F5; color: white;">Blue</button>
 </div>
 
-<div class="row">
-    <button id="drawBtn">Draw</button>
-    <button id="unoBtn">UNO!</button>
-</div>
-
-<h3>Players</h3>
+<!-- Players section -->
+<h2>Players</h2>
 <ul id="players"></ul>
 
-<h3>Your Hand</h3>
-<div id="hand"></div>
+<!-- Game status info -->
+<div style="margin-top: 20px; padding: 10px; background: #f0f0f0; border-radius: 5px; font-size: 0.9em;">
+    <p><b>Current Turn:</b> <span id="turnLabel">?</span></p>
+    <p><b>Wild Colour:</b> <span id="wildLabel">None</span></p>
+    <p><b>Token:</b> <span id="tokenLabel" style="word-break: break-all;">-</span></p>
+    <p><b>Player:</b> <span id="playerLabel" style="word-break: break-all;">-</span></p>
+</div>
 
-<pre id="log"></pre>
+<!-- Debug log -->
+<pre id="log" style="margin-top: 12px; border: 1px solid #ccc; padding: 10px; height: 120px; overflow: auto; font-size: 0.75em; white-space: pre-wrap;"></pre>
 
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 <script src="/js/game.js"></script>
 <script>
+    // Mapping from card value string to number/symbol
+    const valueMap = {
+        "ZERO": 0, "ONE": 1, "TWO": 2, "THREE": 3, "FOUR": 4, "FIVE": 5,
+        "SIX": 6, "SEVEN": 7, "EIGHT": 8, "NINE": 9,
+        "SKIP": "⏭", "REVERSE": "⟳", "DRAWTWO": "+2", "WILD": "★", "WILDFOUR": "★+4"
+    };
+
+    // Enhance renderPublic to update styled discard card and game info
+    const originalRenderPublic = window.renderPublic;
+    window.renderPublic = function(snap) {
+        originalRenderPublic(snap);
+        
+        // Update styled discard card
+        const discardEl = document.getElementById("discardCard");
+        const discardValueEl = document.getElementById("discardValue");
+        if (discardEl && snap.topDiscard) {
+            const discardColour = snap.topDiscard.colour ? String(snap.topDiscard.colour) : '';
+            const topColour = /\bWILD\b/i.test(discardColour) ? (snap.wildColour || 'black') : discardColour;
+            console.log('Setting discard card colour to:', topColour, 'from', discardColour, 'card:', snap.topDiscard);
+            discardEl.style.setProperty('--card-colour', topColour);
+            
+            if (discardValueEl) {
+                const raw = String(snap.topDiscard.value || '').toUpperCase();
+                const displayValue = valueMap.hasOwnProperty(raw) ? valueMap[raw] : snap.topDiscard.value;
+                console.log('Setting discard value to:', displayValue);
+                discardValueEl.textContent = displayValue;
+            }
+        } else {
+            console.log('Missing discardEl or topDiscard:', {hasEl: !!discardEl, hasCard: !!snap.topDiscard});
+        }
+    };
+
+    // Enhance renderHand to display styled card buttons
+    const originalRenderHand = window.renderHand;
+    window.renderHand = function(hand) {
+        const root = document.getElementById("handContainer");
+        root.innerHTML = "";
+        
+        if (!hand) return;
+        
+        const cardCount = hand.length;
+        root.style.setProperty('--total-cards', cardCount);
+        if (cardCount > 1) {
+            root.style.setProperty('--spacing-unit', ((90 * 10 - 110) / (cardCount - 1)) + 'vw / 10');
+        }
+        
+        hand.forEach((card, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'uno-card';
+            btn.type = 'button';
+            
+            const cardColour = card && card.colour ? String(card.colour) : 'Black';
+            const cssColour = /\bWILD\b/i.test(cardColour) ? 'black' : cardColour;
+            btn.style.setProperty('--card-colour', cssColour);
+            btn.style.setProperty('--i', idx);
+            btn.dataset.index = idx;
+            btn.dataset.colour = cardColour;
+            btn.onclick = function () { playCard(this.dataset.index, this.dataset.colour); };
+            
+            const valDiv = document.createElement('div');
+            valDiv.className = 'value';
+            const raw = card && card.value ? String(card.value).toUpperCase() : '';
+            valDiv.textContent = valueMap.hasOwnProperty(raw) ? valueMap[raw] : (card ? card.value : '');
+            btn.appendChild(valDiv);
+            
+            const wrapper = document.createElement('div');
+            wrapper.style.display = 'inline-block';
+            wrapper.appendChild(btn);
+            root.appendChild(wrapper);
+        });
+        
+        document.getElementById('handSize').textContent = 'Hand Size - ' + hand.length;
+    };
+
     connectGame();
 </script>
 

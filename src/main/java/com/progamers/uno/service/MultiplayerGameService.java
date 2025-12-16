@@ -1,6 +1,7 @@
 package com.progamers.uno.service;
 
 import com.progamers.uno.domain.cards.Card;
+import com.progamers.uno.domain.cards.Value;
 import com.progamers.uno.domain.game.Game;
 import com.progamers.uno.domain.multiplayer.lobby.LobbyPlayer;
 import com.progamers.uno.domain.player.Player;
@@ -23,6 +24,7 @@ public class MultiplayerGameService {
     private final Map<String, String> playerNamesById = new LinkedHashMap<>();
     private final List<String> turnOrder = new ArrayList<>();
     private int currentTurnIndex = 0;
+    private int turnDirection = 1; // 1 for forward, -1 for reverse
 
     public MultiplayerGameService(LobbyService lobbyService) {
         this.lobbyService = lobbyService;
@@ -46,6 +48,7 @@ public class MultiplayerGameService {
         playerNamesById.clear();
         turnOrder.clear();
         currentTurnIndex = 0;
+        turnDirection = 1;
         gameOver = false;
 
         // Create per-player Player and deal 7 each
@@ -82,7 +85,7 @@ public class MultiplayerGameService {
     }
 
     private void advanceTurn() {
-        currentTurnIndex = (currentTurnIndex + 1) % turnOrder.size();
+        currentTurnIndex = (currentTurnIndex + turnDirection + turnOrder.size()) % turnOrder.size();
     }
 
     public synchronized java.util.List<String> getTurnOrder() {
@@ -153,7 +156,27 @@ public class MultiplayerGameService {
         game.getDiscardPile().addToPile(p.playCard(cardIndex));
 
         if (wildColor != null) {
+            System.out.println("=== Setting wild colour to: " + wildColor);
             game.getDiscardPile().setWildColour(wildColor);
+        } else {
+            System.out.println("=== wildColor is NULL, not setting wild colour");
+        }
+
+        // Handle special card effects
+        Card playedCard = game.getDiscardPile().getTopCard();
+        if (playedCard.getValue().equals(Value.Skip)) {
+            // Skip card: advance turn twice to skip the next player
+            advanceTurn();
+        } else if (playedCard.getValue().equals(Value.DrawTwo)) {
+            // DrawTwo card: next player draws 2 cards and their turn is skipped
+            advanceTurn();
+            Player nextPlayer = requirePlayer(getCurrentPlayerId());
+            game.drawCards(nextPlayer, 2);
+            advanceTurn();
+            return;
+        } else if (playedCard.getValue().equals(Value.Reverse)) {
+            // Reverse card: reverse the direction of play
+            turnDirection *= -1;
         }
 
         if (p.getHandSize() == 0) {
