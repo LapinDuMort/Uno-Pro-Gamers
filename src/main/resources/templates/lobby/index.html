@@ -3,19 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <title>UNO Lobby</title>
+    <style>
+        body { font-family: sans-serif; }
+        input { padding: 6px; }
+        button { padding: 6px 10px; margin-right: 6px; }
+        #log { margin-top:12px;border:1px solid #ccc;padding:10px;height:200px;overflow:auto;white-space:pre-wrap; }
+        .row { margin-top: 10px; }
+        .muted { color: #666; font-size: 0.9em; }
+    </style>
 </head>
 <body>
 
 <h2>UNO Lobby</h2>
 
-<div>
+<div class="row">
     <label>
         Your name:
         <input id="playerName" placeholder="Enter your name">
     </label>
+    <span class="muted" id="playerIdLabel"></span>
 </div>
 
-<div style="margin-top: 8px;">
+<div class="row">
     <label>
         Lobby token:
         <input id="token" size="40" placeholder="Paste lobby token here">
@@ -23,20 +32,19 @@
     <button id="copyBtn" disabled>Copy</button>
 </div>
 
-<div style="margin-top: 10px;">
+<div class="row">
     <button id="createBtn" disabled>Create Lobby</button>
     <button id="joinBtn" disabled>Join Lobby</button>
     <button id="startBtn" disabled>Start Game</button>
     <button id="goGameBtn" disabled>Go to Game Page</button>
 </div>
 
-<p id="status" style="margin-top:10px;"></p>
+<p id="status" class="row"></p>
 
 <h3>Players</h3>
 <ul id="players"></ul>
 
-<pre id="log"
-     style="margin-top:12px;border:1px solid #ccc;padding:10px;height:200px;overflow:auto;"></pre>
+<pre id="log"></pre>
 
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
