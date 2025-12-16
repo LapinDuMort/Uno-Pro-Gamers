@@ -1,6 +1,7 @@
 package com.progamers.uno.service;
 
 import com.progamers.uno.domain.cards.Card;
+import com.progamers.uno.domain.cards.Value;
 import com.progamers.uno.domain.game.Game;
 import com.progamers.uno.domain.multiplayer.lobby.LobbyPlayer;
 import com.progamers.uno.domain.player.Player;
@@ -157,6 +158,13 @@ public class MultiplayerGameService {
             game.getDiscardPile().setWildColour(wildColor);
         } else {
             System.out.println("=== wildColor is NULL, not setting wild colour");
+        }
+
+        // Handle special card effects
+        Card playedCard = game.getDiscardPile().getTopCard();
+        if (playedCard.getValue().equals(Value.Skip)) {
+            // Skip card: advance turn twice to skip the next player
+            advanceTurn();
         }
 
         if (p.getHandSize() == 0) {
