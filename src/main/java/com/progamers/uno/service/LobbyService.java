@@ -1,5 +1,6 @@
 package com.progamers.uno.service;
 
+import com.progamers.uno.domain.multiplayer.lobby.LobbyPlayer;
 import com.progamers.uno.domain.multiplayer.lobby.LobbySession;
 import com.progamers.uno.domain.multiplayer.lobby.LobbySnapshot;
 import com.progamers.uno.domain.multiplayer.lobby.LobbyState;
@@ -8,6 +9,8 @@ import com.progamers.uno.domain.multiplayer.lobby.exception.LobbyException;
 import com.progamers.uno.domain.multiplayer.lobby.exception.LobbyFullException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -95,6 +98,10 @@ public class LobbyService {
         this.session.setLobbyState(LobbyState.IN_PROGRESS);
 
         return snapshot();
+    }
+
+    public synchronized List<LobbyPlayer> getPlayersInOrder() {
+        return new ArrayList<>(this.session.getPlayerMap().values());
     }
 
     private void validateToken(String token) {
