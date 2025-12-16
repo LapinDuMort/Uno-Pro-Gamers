@@ -25,7 +25,10 @@ function renderPublic(snap) {
   $("wildLabel").textContent = snap.wildColour || "None";
 
   // topDiscard is a Card object; render compactly
-  $("discardLabel").textContent = snap.topDiscard ? JSON.stringify(snap.topDiscard) : "?";
+  const discardLabelEl = $("discardLabel");
+  if (discardLabelEl) {
+    discardLabelEl.textContent = snap.topDiscard ? JSON.stringify(snap.topDiscard) : "?";
+  }
 
   const ul = $("players");
   ul.innerHTML = "";
@@ -133,8 +136,18 @@ function connectGame() {
   $("unoBtn").addEventListener("click", declareUno);
 }
 
+let tempCardIndex = null;
+
 function playCard(cardIndex, wildColor) {
   if (!stompClient) return;
+  
+  // If it's a wildcard, show color picker instead of playing immediately
+  if (/\bWILD\b/i.test(String(wildColor))) {
+    tempCardIndex = cardIndex;
+    document.getElementById("colorPicker").style.display = "block";
+    return;
+  }
+  
   console.log("Sending playCard: cardIndex=" + cardIndex + ", wildColor=" + wildColor);
   stompClient.send("/app/game/play", {}, JSON.stringify({
     token,
@@ -142,6 +155,20 @@ function playCard(cardIndex, wildColor) {
     cardIndex,
     wildColour: wildColor
   }));
+}
+
+function chooseColor(color) {
+  document.getElementById("colorPicker").style.display = "none";
+  if (tempCardIndex !== null) {
+    console.log("Playing wild card with color: " + color);
+    stompClient.send("/app/game/play", {}, JSON.stringify({
+      token,
+      playerId,
+      cardIndex: tempCardIndex,
+      wildColour: color
+    }));
+    tempCardIndex = null;
+  }
 }
 
 function drawCard() {
