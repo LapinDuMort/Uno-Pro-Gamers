@@ -1,212 +1,206 @@
+/* global SockJS, Stomp */
+
 let stompClient = null;
-let connected = false;
 
-// Keep a stable playerId per tab so reconnects don't create "new" players.
-const playerId = localStorage.getItem("unoPlayerId") || crypto.randomUUID();
-localStorage.setItem("unoPlayerId", playerId);
+// playerId should be per-tab (sessionStorage), not shared (localStorage)
+const SS_PLAYER_ID = "uno.session.playerId";
 
-const nameInput = document.getElementById("playerName");
-const tokenInput = document.getElementById("token");
-const copyBtn = document.getElementById("copyBtn");
-const createBtn = document.getElementById("createBtn");
-const joinBtn = document.getElementById("joinBtn");
-const startBtn = document.getElementById("startBtn");
-const goGameBtn = document.getElementById("goGameBtn");
-const statusEl = document.getElementById("status");
-const playersList = document.getElementById("players");
-const logEl = document.getElementById("log");
+// name + token can stay in localStorage if you want convenience
+const LS_PLAYER_NAME = "uno.playerName";
+const LS_TOKEN = "uno.token";
 
-function log(msg) {
-  logEl.textContent += msg + "\n";
-  logEl.scrollTop = logEl.scrollHeight;
-}
+function uuidV4() {
+  if (window.crypto && crypto.getRandomValues) {
+    const buf = new Uint8Array(16);
+    crypto.getRandomValues(buf);
+    buf[6] = (buf[6] & 0x0f) | 0x40;
+    buf[8] = (buf[8] & 0x3f) | 0x80;
 
-function normalizePlayerName() {
-  const n = (nameInput.value || "").trim();
-  return n.length ? n : "Player";
-}
+    const hex = [...buf].map(b => b.toString(16).padStart(2, "0")).join("");
+    return (
+      hex.slice(0, 8) + "-" +
+      hex.slice(8, 12) + "-" +
+      hex.slice(12, 16) + "-" +
+      hex.slice(16, 20) + "-" +
+      hex.slice(20)
+    );
+  }
 
-function renderPlayers(names) {
-  playersList.innerHTML = "";
-  (names || []).forEach(n => {
-    const li = document.createElement("li");
-    li.textContent = n;
-    playersList.appendChild(li);
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
   });
 }
 
-function setUiConnected(isConnected) {
-  createBtn.disabled = !isConnected;
-  joinBtn.disabled = !isConnected;
-  startBtn.disabled = true;
-  goGameBtn.disabled = true;
-  copyBtn.disabled = !isConnected || !tokenInput.value;
+function $(id) { return document.getElementById(id); }
+
+function log(msg) {
+  const el = $("log");
+  el.textContent += `[${new Date().toLocaleTimeString()}] ${msg}\n`;
+  el.scrollTop = el.scrollHeight;
 }
 
-function setUiForLobbyState(snapshot) {
-  const state = snapshot?.lobbyState;
-  const playerCount = (snapshot?.playerNames || []).length;
-  const hasToken = !!tokenInput.value;
-
-  if (!state) {
-    statusEl.textContent = "Connected. Checking lobby...";
-    startBtn.disabled = true;
-    goGameBtn.disabled = true;
-    return;
+function loadIdentity() {
+  // Per-tab playerId
+  let playerId = sessionStorage.getItem(SS_PLAYER_ID);
+  if (!playerId) {
+    playerId = uuidV4();
+    sessionStorage.setItem(SS_PLAYER_ID, playerId);
   }
 
-  if (state === "OPEN") {
-    statusEl.textContent = "Lobby is open. Share the token, Join, then Start.";
-    createBtn.disabled = true;
-    joinBtn.disabled = false;
-    startBtn.disabled = !(playerCount >= 2 && hasToken); // host can start once >=2
-    goGameBtn.disabled = true;
-    copyBtn.disabled = !hasToken;
-  } else if (state === "IN_GAME") {
-    statusEl.textContent = "Game is in progress. Go to the game page.";
-    createBtn.disabled = true;
-    joinBtn.disabled = true;
-    startBtn.disabled = true;
-    goGameBtn.disabled = false;
-    copyBtn.disabled = !hasToken;
+  const savedName = localStorage.getItem(LS_PLAYER_NAME) || "";
+  const savedToken = localStorage.getItem(LS_TOKEN) || "";
+
+  $("playerName").value = savedName;
+  $("token").value = savedToken;
+  $("playerIdLabel").textContent = ` (id: ${playerId.slice(0, 8)}…)`;
+
+  return { playerId };
+}
+
+function saveInputs() {
+  localStorage.setItem(LS_PLAYER_NAME, $("playerName").value.trim());
+  localStorage.setItem(LS_TOKEN, $("token").value.trim());
+}
+
+function setButtonsEnabled(connected) {
+  $("createBtn").disabled = !connected;
+  $("joinBtn").disabled = !connected;
+  $("copyBtn").disabled = !connected;
+  $("startBtn").disabled = !connected;
+  if (!connected) $("goGameBtn").disabled = true;
+}
+
+function updatePlayersList(items) {
+  const ul = $("players");
+  ul.innerHTML = "";
+  (items || []).forEach((p) => {
+    const li = document.createElement("li");
+    li.textContent = String(p);
+    ul.appendChild(li);
+  });
+}
+
+function updateStatus(text) {
+  $("status").textContent = text;
+}
+
+function copyToken() {
+  const token = $("token").value.trim();
+  if (!token) return;
+  navigator.clipboard.writeText(token).then(() => log("Copied token to clipboard."))
+    .catch(() => log("Failed to copy token (clipboard permission?)."));
+}
+
+// Token must be UUID because backend does UUID.fromString(token)
+function ensureUuidTokenForHostCreate(alwaysNew = false) {
+  let token = $("token").value.trim();
+  if (alwaysNew || !token) {
+    token = uuidV4();
+    log(`Generated lobby token (UUID): ${token}`);
   } else {
-    // CLOSED (or anything else)
-    statusEl.textContent = "No open lobby. Click Create Lobby.";
-    createBtn.disabled = false;
-    joinBtn.disabled = false; // allow join if they paste a token someone sends
-    startBtn.disabled = true;
-    goGameBtn.disabled = true;
-    copyBtn.disabled = !hasToken;
+    log(`Using existing token: ${token}`);
   }
+  $("token").value = token;
+  localStorage.setItem(LS_TOKEN, token);
+  return token;
 }
 
 function connect() {
-  const socket = new SockJS("/ws-uno");
+  const socket = new SockJS("/ws");
   stompClient = Stomp.over(socket);
-  stompClient.debug = null;
+  stompClient.debug = () => {};
 
   stompClient.connect({}, () => {
-    connected = true;
-    log("Connected");
-    statusEl.textContent = "Connected. Checking lobby...";
-    setUiConnected(true);
+    log("STOMP connected.");
+    setButtonsEnabled(true);
 
-    stompClient.subscribe("/topic/lobby", msg => {
-      const snapshot = JSON.parse(msg.body);
-      handleLobbySnapshot(snapshot);
+    stompClient.subscribe("/topic/lobby", (msg) => {
+      const snap = JSON.parse(msg.body);
+      log(`Lobby snapshot: state=${snap.lobbyState} players=${(snap.playerNames || []).length}/${snap.maxPlayers}`);
+      updatePlayersList(snap.playerNames || []);
+      updateStatus(`Lobby: ${snap.lobbyState} | Players: ${(snap.playerNames || []).length}/${snap.maxPlayers}`);
+
+      const canStart = snap.lobbyState === "OPEN" && (snap.playerNames || []).length >= 2;
+      $("startBtn").disabled = !canStart;
     });
 
-    stompClient.subscribe("/topic/lobby/errors", msg => {
-      log("ERROR: " + msg.body);
+    stompClient.subscribe("/topic/game/events", (msg) => {
+        if (msg.body === "STARTED") {
+            window.location.href = "/game.html";
+        }
     });
 
-    // Optional: auto-navigate to game when server signals start.
-    stompClient.subscribe("/topic/game/events", msg => {
-      if (msg.body === "STARTED") {
-        log("Game started; navigating to /playerpage");
-        window.location.href = "/playerpage";
-      }
-    });
+    stompClient.send("/app/lobby/status", {}, JSON.stringify({}));
 
-    requestLobbyStatus();
-  }, err => {
-    connected = false;
-    setUiConnected(false);
-    statusEl.textContent = "Not connected.";
-    log("Connect error: " + err);
+  }, (err) => {
+    log("STOMP connection error: " + err);
+    setButtonsEnabled(false);
   });
 }
 
-function requestLobbyStatus() {
-  stompClient.send("/app/lobby/status", {}, {});
-}
-
-function handleLobbySnapshot(snapshot) {
-  log("LOBBY: " + JSON.stringify(snapshot));
-
-  // If backend includes token in snapshot when OPEN, auto-fill it.
-  // If it doesn't, manual copy/paste still works.
-  if (snapshot.token && !tokenInput.value) {
-    tokenInput.value = snapshot.token;
-  }
-
-  renderPlayers(snapshot.playerNames);
-  setUiForLobbyState(snapshot);
-}
-
-function createLobby() {
-  if (!connected) return;
-
-  if (!tokenInput.value) {
-    tokenInput.value = crypto.randomUUID(); // token is visible/shareable
-  }
+function openLobby(playerId) {
+  saveInputs();
+  const token = ensureUuidTokenForHostCreate(false);
 
   stompClient.send("/app/lobby/open", {}, JSON.stringify({
-    token: tokenInput.value,
-    playerId: playerId,
-    playerName: normalizePlayerName()
+    token,
+    playerId,
+    playerName: $("playerName").value.trim() || "Host"
   }));
 
-  log("Sent CREATE");
+  log("Sent: /app/lobby/open");
+  updateStatus("Lobby opening...");
 }
 
-function joinLobby() {
-  if (!connected) return;
+function joinLobby(playerId) {
+  saveInputs();
 
-  if (!tokenInput.value) {
-    log("Paste a token to join, or create a lobby.");
-    return;
-  }
+  const token = $("token").value.trim();
+  const playerName = $("playerName").value.trim();
+
+  if (!token) return log("Token is required to join lobby (paste it from the host).");
+  if (!playerName) return log("Player name is required.");
 
   stompClient.send("/app/lobby/join", {}, JSON.stringify({
-    token: tokenInput.value,
-    playerId: playerId,
-    playerName: normalizePlayerName()
+    token,
+    playerId,
+    playerName
   }));
 
-  log("Sent JOIN");
+  log("Sent: /app/lobby/join");
+  updateStatus("Joining lobby...");
 }
 
-function startGame() {
-  if (!connected) return;
+function startGame(playerId) {
+  saveInputs();
+  const token = $("token").value.trim();
+  if (!token) return log("Token is required to start game.");
 
-  if (!tokenInput.value) {
-    log("No token available to start game.");
-    return;
-  }
-
-  stompClient.send("/app/lobby/start", {}, JSON.stringify({
-    token: tokenInput.value,
-    playerId: playerId
-  }));
-
-  log("Sent START");
+  stompClient.send("/app/lobby/start", {}, JSON.stringify({ token, playerId }));
+  log("Sent: /app/lobby/start");
+  updateStatus("Starting game...");
 }
 
-async function copyToken() {
-  if (!tokenInput.value) return;
-  try {
-    await navigator.clipboard.writeText(tokenInput.value);
-    log("Token copied");
-  } catch (e) {
-    tokenInput.select();
-    log("Clipboard blocked; token selected for manual copy.");
-  }
+function goToGamePage(playerId) {
+  saveInputs();
+  const token = $("token").value.trim();
+  if (!token) return log("Token is required to go to game page.");
+
+  window.location.href =
+    `/game.html?token=${encodeURIComponent(token)}&playerId=${encodeURIComponent(playerId)}`;
 }
 
-function goToGamePage() {
-  window.location.href = "/playerpage";
-}
+(function init() {
+  const { playerId } = loadIdentity();
 
-createBtn.onclick = createLobby;
-joinBtn.onclick = joinLobby;
-startBtn.onclick = startGame;
-copyBtn.onclick = copyToken;
-goGameBtn.onclick = goToGamePage;
+  $("copyBtn").addEventListener("click", copyToken);
+  $("createBtn").addEventListener("click", () => openLobby(playerId));
+  $("joinBtn").addEventListener("click", () => joinLobby(playerId));
+  $("startBtn").addEventListener("click", () => startGame(playerId));
+  $("goGameBtn").addEventListener("click", () => goToGamePage(playerId));
 
-// Auto-connect when page loads
-window.addEventListener("load", () => {
-  setUiConnected(false);
-  statusEl.textContent = "Connecting...";
+  setButtonsEnabled(false);
   connect();
-});
+})();
