@@ -1,5 +1,6 @@
 package com.progamers.uno.controller;
 
+import com.progamers.uno.domain.player.Player;
 import com.progamers.uno.service.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -8,6 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
+
+import java.util.List;
 
 /**
  * MVC controller for handling web requests for the game.
@@ -34,6 +37,18 @@ public class GameController {
         model.addAttribute("wildColour", gameService.checkTopDiscardWild());
         model.addAttribute("gameOver", gameService.isGameOver());
         model.addAttribute("hasUno", gameService.hasUno());
+
+
+        List<Player> players = List.of(
+                new Player("Aryn", 7,true),
+                new Player("Robyn", 7,false),
+                new Player("Jordan", 7,false),
+                new Player("Blake", 7,true),
+                new Player("Tina",7,false)
+        );
+
+        model.addAttribute("players", players);
+        model.addAttribute("ActivePlayer", "Tina");
         return "UnoPlayerPage";
     }
 

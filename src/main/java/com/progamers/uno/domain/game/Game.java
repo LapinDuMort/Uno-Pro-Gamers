@@ -39,7 +39,7 @@ public class Game {
     }
 
     //isValidMove compares value and colour to check move legality, and if selectedCard is a Wild type
-    public boolean isValidMove(Card topCard, Card selectedCard){
-        return ValidityChecker.isValid(topCard, selectedCard);
+    public boolean isValidMove(DiscardPile Pile, Card selectedCard){
+        return ValidityChecker.isValid(Pile, selectedCard);
     }
 }

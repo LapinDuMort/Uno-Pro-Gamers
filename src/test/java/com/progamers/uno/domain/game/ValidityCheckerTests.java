@@ -27,7 +27,7 @@ public class ValidityCheckerTests {
         Card redTwo = Card.builder().colour(Colour.Red).value(Value.Two).build();
         player.addCardToHand(redTwo);
         testDiscardPile.addToPile(redTwo);
-        boolean result = game.isValidMove(testDiscardPile.getTopCard(), player.playCard(0));
+        boolean result = game.isValidMove(testDiscardPile, player.playCard(0));
         assert result;
     }
     @Test
@@ -36,7 +36,7 @@ public class ValidityCheckerTests {
         Card fourYellow = Card.builder().colour(Colour.Yellow).value(Value.Four).build();
         player.addCardToHand(fourYellow);
         testDiscardPile.addToPile(redTwo);
-        boolean result = game.isValidMove(testDiscardPile.getTopCard(), player.playCard(0));
+        boolean result = game.isValidMove(testDiscardPile, player.playCard(0));
         assert !result;
     }
     @Test
@@ -48,7 +48,7 @@ public class ValidityCheckerTests {
         player.addCardToHand(redTwo);
         player.addCardToHand(blueTwo);
         testDiscardPile.addToPile(redTwo);
-        List<Card> validCards = ValidityChecker.validCardList(player.getPlayerHand(), testDiscardPile.getTopCard());
+        List<Card> validCards = ValidityChecker.validCardList(player.getPlayerHand(), testDiscardPile);
         assert validCards.size() == 2;
         assert validCards.getFirst().equals(redTwo);
         assert validCards.getLast().equals(blueTwo);

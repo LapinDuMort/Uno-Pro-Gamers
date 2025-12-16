@@ -61,6 +61,7 @@ public class GameService {
     public void playCard(int index, String WildColor) throws Exception {
         playCard(index);
         if(WildColor != null) {
+
             this.game.getDiscardPile().setWildColour(WildColor);
         }
     }
@@ -72,7 +73,7 @@ public class GameService {
         Card selectedCard = this.player.getCurrentSelectedCard(index);
         Card topCard = this.game.getDiscardPile().getTopCard();
 
-        if (!this.game.isValidMove(topCard, selectedCard)) return;
+        if (!this.game.isValidMove(this.game.getDiscardPile(), selectedCard)) return;
 
         if (player.getHandSize() == 1 && !this.player.getHasUno()) {
             this.game.drawCards(this.player, 2);

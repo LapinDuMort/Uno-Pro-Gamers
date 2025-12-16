@@ -4,12 +4,37 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>UNO Game</title>
-        <link rel="stylesheet" href="/css/globalstyle.css">
-        <link rel="stylesheet" href="/css/uno.css">
+        <link rel="stylesheet" th:href="@{/css/globalstyle.css}">
+        <link rel="stylesheet" th:href="@{/css/uno.css}">
+        <link rel="stylesheet" th:href="@{/css/New.css}">
     </head>
     <body>
+    <div class="player-list">
+        <h2>Players</h2>
+        <ul>
+            <li th:each="player : ${players}"
+                th:classappend="${player.name == ActivePlayer} ? 'active-player'">
+                <span class="player-name" th:text="${player.name}"></span>
+                <span class="player-cards"
+                      th:text="'(' + ${player.CardsInHand} + ' cards)'"></span>
+                <span th:if="${hasUno}" class="uno-warning-inline">UNO!</span>
+                <div class="uno-controls">
+                    <form th:if="${!gameOver and !hasUno}"
+                          th:action="@{/uno}"
+                          method="post">
+                        <button type="submit"
+                                class="uno-button"
+                                th:disabled="${#lists.size(playerHand) > 1}">UNO!
+                        </button>
+                    </form>
+
+            </li>
+        </ul>
+    </div>
+
     <h1>UNO Game</h1>
     <div class="game-board">
+
         <div class="pile">
             <h2>Draw Pile</h2>
             <div class="uno-card single">?</div>
@@ -25,40 +50,27 @@
             </div>
         </div>
     </div>
-    <h2>Your Hand</h2>
-    <div th:text="'Hand Size - ' + ${playerHand.size()}"></div>
-    <div class="hand"
-         th:with="cardCount=${playerHand.size()}"
-         th:style="|--total-cards:${cardCount};
-             --spacing-unit: ${cardCount > 1 ?#numbers.formatDecimal( (90 * 10 - 110) / (cardCount - 1), 0, 2) + 'vw / 10' :'0px'};|">
+
+    <h1>Your Hand</h1>
+    </div>
+    <div class="hand" id="hand-container">
+<!--         th:with="cardCount=${playerHand.size()}"-->
+<!--         th:style="|&#45;&#45;total-cards:${cardCount};-->
+<!--             &#45;&#45;spacing-unit: ${cardCount > 1 ?#numbers.formatDecimal( (90 * 10 - 110) / (cardCount - 1), 0, 2) + 'vw / 10' :'0px'};|">-->
 
         <form th:each="card, iter : ${playerHand}"
               th:id="'playForm' + ${iter.index}"
               th:action="@{/play}"
-              method="post"
-              style="display:inline-block">
+              method="post">
             <input type="hidden" name="cardIndex" th:value="${iter.index}" />
             <button type="button"
                     class="uno-card"
                     th:attr="data-index=${iter.index}, data-colour=${card.colour.name()}"
-                    th:onclick="|playCard(this)|"
-                    th:style="|--card-colour:${#strings.equals(card.colour, 'Wild') ? 'black' : card.colour}; --i:${iter.index}|">
+                    th:onclick="|playCard(this)|">
                 <div class="value" th:text="${card.value}"></div>
             </button>
         </form>
         </div>
-
-    <!-- UNO declaration controls -->
-    <div class="uno-controls">
-        <p th:if="${hasUno}">UNO declared!</p>
-        <p th:if="${!hasUno}">UNO not declared!</p>
-
-        <form th:if="${!gameOver} and ${#lists.size(playerHand)} == 1 and ${!hasUno}"
-              th:action="@{/uno}"
-              method="post">
-            <button type="submit" class="uno-button">Declare UNO</button>
-        </form>
-    </div>
 
     <!-- Wild card color picker popup -->
     <div id="colorPicker" class="color-popup" style="display:none;">
@@ -72,70 +84,8 @@
             <button type="button" onclick="chooseColor('Blue')">Blue</button>
         </form>
     </div>
-
-    <script>
-        function playCard(button) {
-            const index = button.dataset.index;
-            const colour = button.dataset.colour;
-
-            if (colour.toUpperCase() === 'WILD') {
-                window.tempCardIndex = index;
-                document.getElementById("colorPicker").style.display = "block";
-                return;
-            }
-            const form = document.getElementById("playForm" + index);
-            if (form) form.submit();
-        }
-
-        function chooseColor(color) {
-            document.getElementById("colorPicker").style.display = "none";
-
-            const indexInput = document.getElementById("wildCardIndex");
-            const colorInput = document.getElementById("wildColor");
-
-            if (!indexInput || !colorInput) {
-                console.error("Hidden form inputs not found!");
-                return;
-            }
-
-            indexInput.value = window.tempCardIndex;
-            colorInput.value = color;
-
-            document.getElementById("wildForm").submit();
-        }
-    </script>
-    <script>
-        // Mapping from card value string to number
-        const valueMap = {
-            "ZERO": 0,
-            "ONE": 1,
-            "TWO": 2,
-            "THREE": 3,
-            "FOUR": 4,
-            "FIVE": 5,
-            "SIX": 6,
-            "SEVEN": 7,
-            "EIGHT": 8,
-            "NINE": 9,
-            "SKIP": "⏭",
-        "REVERSE": "⟳",
-        "DRAWTWO": "+2",
-        "WILD": "★",
-        "WILDFOUR": "★+4"
-        };
-
-        // Function to replace card string with number
-        function convertCardValues(containerSelector) {
-            document.querySelectorAll(containerSelector).forEach(i => {
-                const text = i.textContent.trim().toUpperCase();
-                if (valueMap.hasOwnProperty(text)) {
-                    i.textContent = valueMap[text];
-                }
-            });
-        }
-        convertCardValues('.hand .uno-card .value');
-        convertCardValues('.pile .uno-card.single .value');
-    </script>
-
+    <script th:src="@{/js/play-card.js}"></script>
+    <script th:src="@{/js/card-values.js}"></script>
+    <script th:src="@{/js/hand-layout.js}"></script>
     </body>
     </html>

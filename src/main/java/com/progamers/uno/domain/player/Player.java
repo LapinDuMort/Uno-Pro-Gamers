@@ -14,7 +14,10 @@ import java.util.List;
 @Setter
 public class Player {
 
-    private Boolean hasUno;
+
+    private String name;
+    private int CardsInHand;
+    public Boolean hasUno;
     private List<Card> playerHand;
     private int currentSelected;
 
@@ -23,6 +26,13 @@ public class Player {
         this.playerHand = new ArrayList<Card>();
         this.currentSelected = 0;
     }
+
+    public Player(String name, int CardsInHand,Boolean hasUno) {
+        this.name = name;
+        this.CardsInHand = CardsInHand;
+        this.hasUno = false;
+    }
+
     public Card getCurrentSelectedCard(int index) throws Exception {
         // Check if the player's hand is empty
         if (playerHand.isEmpty()) {
