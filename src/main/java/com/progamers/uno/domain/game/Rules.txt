@@ -1,0 +1,14 @@
+Uno Rules!
+
+The rules of Uno are as follows-
+- Each player takes a turn, where they can play a card matching the colour, value or play a wild card;
+- If there are no legal plays, you instead must draw a card and skip your turn;
+- If you have one card left in hand you must declare "Uno!" or you will be forced to draw two cards;
+- The first player to play every card in their hand wins the game!
+
+Players can also play special cards such as:
+- +2, the next player draws 2 and skips their turn;
+- Skip, the next player skips their turn;
+- Reverse, the turn order is reversed;
+- Wild, you can select any colour;
+- WildFour, you can select any colour and the next player draws four and skips their turn;
