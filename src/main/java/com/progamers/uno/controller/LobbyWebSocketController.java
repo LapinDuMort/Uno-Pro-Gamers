@@ -4,8 +4,10 @@ import com.progamers.uno.domain.multiplayer.lobby.LobbySnapshot;
 import com.progamers.uno.domain.multiplayer.lobby.dto.JoinRequestDTO;
 import com.progamers.uno.domain.multiplayer.lobby.dto.StartGameRequestDTO;
 import com.progamers.uno.service.LobbyService;
+import com.progamers.uno.service.MultiplayerGameService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -19,6 +21,9 @@ public class LobbyWebSocketController {
     private final LobbyService lobbyService;
 
     @Autowired
+    private final MultiplayerGameService multiplayerGameService;
+
+    @Autowired
     private final SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/lobby/open")
@@ -30,7 +35,7 @@ public class LobbyWebSocketController {
     @MessageMapping("/lobby/join")
     public void joinLobby(JoinRequestDTO requestDTO, SimpMessageHeaderAccessor headers) {
         String sessionId = headers.getSessionId();
-        LobbySnapshot snapshot = lobbyService.joinLobby(requestDTO.getToken(), requestDTO.getPlayerName(), requestDTO.getPlayerId(), sessionId);
+        LobbySnapshot snapshot = lobbyService.joinLobby(requestDTO.getToken(), requestDTO.getPlayerId(), requestDTO.getPlayerName(), sessionId);
         messagingTemplate.convertAndSend("/topic/lobby", snapshot);
     }
 
@@ -38,11 +43,17 @@ public class LobbyWebSocketController {
     public void start(StartGameRequestDTO requestDTO) {
         LobbySnapshot snap = lobbyService.startGame(requestDTO.getToken());
         messagingTemplate.convertAndSend("/topic/lobby", snap);
+        multiplayerGameService.startFromLobby(requestDTO.getToken());
         messagingTemplate.convertAndSend("/topic/game/events", "STARTED");
     }
 
     @MessageMapping("/lobby/status")
     public void lobbyStatus() {
         messagingTemplate.convertAndSend("/topic/lobby", lobbyService.getLobbyStatus());
+    }
+
+    @MessageExceptionHandler
+    public void handle(Exception ex) {
+        messagingTemplate.convertAndSend("/topic/errors", ex.getMessage());
     }
 }
