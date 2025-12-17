@@ -93,7 +93,7 @@ class GameWebSocketControllerTests {
     /* --- draw tests --- */
 
     @Test
-    void testDraw_withValidDto_thenCallsServiceAndPublishesSnapshotAndHands() {
+    void testDraw_withValidDto_thenCallsServiceAndPublishesSnapshotAndHands() throws Exception {
         // arrange
         DrawCardRequestDTO dto = mock(DrawCardRequestDTO.class);
         when(dto.getPlayerId()).thenReturn("p1");
@@ -119,7 +119,7 @@ class GameWebSocketControllerTests {
     }
 
     @Test
-    void testDraw_whenServiceThrows_thenSwallowsAndDoesNotPublish() {
+    void testDraw_whenServiceThrows_thenSwallowsAndDoesNotPublish() throws Exception {
         // arrange
         DrawCardRequestDTO dto = mock(DrawCardRequestDTO.class);
         when(dto.getPlayerId()).thenReturn("p1");
@@ -188,7 +188,6 @@ class GameWebSocketControllerTests {
     void testSyncGameState_withValidDto_thenPublishesSnapshotAndHandsWithoutMutations() throws Exception {
         // arrange
         PlayCardRequestDTO dto = mock(PlayCardRequestDTO.class);
-        when(dto.getPlayerId()).thenReturn("p1");
         when(dto.getToken()).thenReturn("token-123");
 
         when(gameService.publicSnapshot()).thenReturn(Collections.emptyMap());

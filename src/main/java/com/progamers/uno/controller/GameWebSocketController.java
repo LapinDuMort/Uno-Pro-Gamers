@@ -18,14 +18,8 @@ public class GameWebSocketController {
 
     @MessageMapping("/game/play")
     public void play(PlayCardRequestDTO dto) throws Exception {
-        try {
-            gameService.playCard(dto.getPlayerId(), dto.getCardIndex(), dto.getWildColour());
-            publish(dto.getToken());
-        } catch (Exception e) {
-            System.err.println("Play card error for " + dto.getPlayerId() + ": " + e.getMessage());
-            e.printStackTrace();
-            throw e;
-        }
+        gameService.playCard(dto.getPlayerId(), dto.getCardIndex(), dto.getWildColour());
+        publish(dto.getToken());
     }
 
     @MessageMapping("/game/draw")
@@ -33,8 +27,8 @@ public class GameWebSocketController {
         try {
             gameService.drawCard(dto.getPlayerId());
             publish(dto.getToken());
-        } catch (Exception e) {
-            System.err.println("Draw card error for " + dto.getPlayerId() + ": " + e.getMessage());
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -44,19 +38,18 @@ public class GameWebSocketController {
         try {
             gameService.declareUno(dto.getPlayerId());
             publish(dto.getToken());
-        } catch (Exception e) {
-            System.err.println("Declare uno error for " + dto.getPlayerId() + ": " + e.getMessage());
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     @MessageMapping("/game/sync")
     public void syncGameState(PlayCardRequestDTO dto) {
-        System.out.println("=== Client requesting game sync for token: " + dto.getToken() + ", playerId: " + dto.getPlayerId());
         try {
             publish(dto.getToken());
-        } catch (Exception e) {
-            System.err.println("Sync error: " + e.getMessage());
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
     }
