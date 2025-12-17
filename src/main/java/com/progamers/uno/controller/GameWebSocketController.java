@@ -24,30 +24,48 @@ public class GameWebSocketController {
 
     @MessageMapping("/game/draw")
     public void draw(DrawCardRequestDTO dto) {
-        gameService.drawCard(dto.getPlayerId());
-        publish(dto.getToken());
+        try {
+            gameService.drawCard(dto.getPlayerId());
+            publish(dto.getToken());
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @MessageMapping("/game/uno")
     public void uno(DeclareUnoRequestDTO dto) {
-        gameService.declareUno(dto.getPlayerId());
-        publish(dto.getToken());
+        try {
+            gameService.declareUno(dto.getPlayerId());
+            publish(dto.getToken());
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @MessageMapping("/game/sync")
     public void syncGameState(PlayCardRequestDTO dto) {
-        publish(dto.getToken());
+        try {
+            publish(dto.getToken());
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
-
-    /* --- helpers --- */
 
     private void publish(String token) {
         // public snapshot
-        messaging.convertAndSend("/topic/game/" + token, gameService.publicSnapshot());
+        messaging.convertAndSend(
+                "/topic/game/" + token,
+                gameService.publicSnapshot()
+        );
 
         // per-player hands (demo-safe)
         for (String playerId : gameService.getTurnOrder()) {
-            messaging.convertAndSend("/topic/game/" + token + "/hand/" + playerId, gameService.getHand(playerId)
+            messaging.convertAndSend(
+                    "/topic/game/" + token + "/hand/" + playerId,
+                    gameService.getHand(playerId)
             );
         }
     }
