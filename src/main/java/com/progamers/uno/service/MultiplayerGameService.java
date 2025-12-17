@@ -174,6 +174,15 @@ public class MultiplayerGameService {
             game.drawCards(nextPlayer, 2);
             advanceTurn();
             return;
+
+        } else if (playedCard.getValue().equals(Value.WildFour)) {
+            // WildFour card: next player draws 4 cards and their turn is skipped
+            advanceTurn();
+            Player nextPlayer = requirePlayer(getCurrentPlayerId());
+            game.drawCards(nextPlayer, 4);
+            advanceTurn();
+            return;
+
         } else if (playedCard.getValue().equals(Value.Reverse)) {
             // Reverse card: reverse the direction of play
             turnDirection *= -1;
