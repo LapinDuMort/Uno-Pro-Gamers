@@ -83,6 +83,38 @@ public class LobbyServiceTests {
     }
 
     @Test
+    void testJoinLobby_whenLobbyInProgress_thenThrowsLobbyException() {
+        // random token + open lobby
+        String token = UUID.randomUUID().toString();
+        lobbyService.openLobby(token);
+        // join 2 players
+        lobbyService.joinLobby(token, "p1", "player1", "s1");
+        lobbyService.joinLobby(token, "p2", "player2", "s1");
+        // start game to set lobby IN_PROGRESS
+        lobbyService.startGame(token);
+        // attempt to join new player
+        // assert exception thrown
+        assertThrows(LobbyException.class,
+                () -> lobbyService.joinLobby(token, "p2", "player2", "s1"));
+    }
+
+    @Test
+    void testJoinLobby_withIncorrectToken_thenThrowsInvalidTokenException() {
+        // random token + join lobby
+        String token = UUID.randomUUID().toString();
+        lobbyService.openLobby(token);
+        // join 2 players
+        lobbyService.joinLobby(token, "p1", "player1", "s1");
+        lobbyService.joinLobby(token, "p2", "player2", "s1");
+        // no need to start game otherwise different exception thrown
+        // attempt to join new player
+        // with different token
+        // assert exception thrown
+        assertThrows(InvalidTokenException.class,
+                () -> lobbyService.joinLobby(UUID.randomUUID().toString(), "p2", "player2", "s1"));
+    }
+
+    @Test
     void testJoinLobby_withFullLobby_thenThrowsLobbyFullException() {
         // random token
         // and open lobby
