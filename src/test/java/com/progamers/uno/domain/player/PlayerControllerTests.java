@@ -104,13 +104,27 @@ class PlayerControllerTests {
     }
 
     @Test
+    void testDeclareUno_withHandSizeTwo_thenSetsHasUnoTrue() {
+        // create two random cards
+        Card cardRedFive = Card.builder().value(Value.Five).colour(Colour.Red).build();
+        Card cardBlueNine = Card.builder().value(Value.Nine).colour(Colour.Blue).build();
+        // add both cards to hand
+        player.addCardToHand(cardRedFive);
+        player.addCardToHand(cardBlueNine);
+        // declare uno
+        player.declareUno();
+        // assert hasUno is true
+        assertTrue(player.getHasUno());
+    }
+
+    @Test
     void TestUnoTrue() {
         Card cardRedFive = Card.builder().value(Value.Five).colour(Colour.Red).build();
         player.addCardToHand(cardRedFive);
 
         player.declareUno();
 
-        assertEquals(true, player.getHasUno());
+        assertFalse(player.getHasUno());
     }
 
     @Test
