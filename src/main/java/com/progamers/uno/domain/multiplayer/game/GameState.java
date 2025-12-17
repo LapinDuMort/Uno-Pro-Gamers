@@ -1,6 +1,7 @@
 package com.progamers.uno.domain.multiplayer.game;
 
 import com.progamers.uno.domain.game.Game;
+import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.Map;
  * Mutable state for active game session
  * State holder only no business rules
  */
+@Getter
 public class GameState {
 
     private final Map<String, GamePlayer> playerMap = new LinkedHashMap<>();

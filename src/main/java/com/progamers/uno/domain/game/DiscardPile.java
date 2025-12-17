@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DiscardPile {
+
     List<Card> playedCards;
     public String WildColour;
-
 
     public DiscardPile(){
         this.playedCards  = new ArrayList<Card>();
@@ -25,9 +25,11 @@ public class DiscardPile {
     public void addToPile(Card card){
         this.playedCards.add(card);
     }
+
     public Card getTopCard(){
         return playedCards.getLast();
     }
+
     public List<Card> refillDeck(){
         Card cardInPlay = this.playedCards.removeLast();
         List<Card> returningCards = new ArrayList<>(playedCards);
