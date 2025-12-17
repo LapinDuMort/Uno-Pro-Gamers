@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.8'
 	id 'io.spring.dependency-management' version '1.1.7'
+    id 'jacoco'
 }
 
 group = 'com.progamers'
@@ -37,6 +38,7 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+    finalizedBy tasks.jacocoTestReport
 }
 
 tasks.register("listTestFiles") {
@@ -47,5 +49,19 @@ tasks.register("listTestFiles") {
         sourceSets.test.allSource.files
             .sort{ it.path }
             .each { file -> println "TEST FILE $file" }
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+tasks.jacocoTestReport {
+    dependsOn tasks.test
+
+    reports {
+        html.required = true
+        xml.required = true
+        csv.required = false
     }
 }
