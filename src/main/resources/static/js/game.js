@@ -21,8 +21,8 @@ function parseQuery() {
 }
 
 function renderPublic(snap) {
-  $("turnLabel").textContent = snap.currentPlayerId || "?";
-  $("wildLabel").textContent = snap.wildColour || "None";
+//  $("turnLabel").textContent = snap.currentPlayerId || "?";
+//  $("wildLabel").textContent = snap.wildColour || "None";
 
   // topDiscard is a Card object; render compactly
   const discardLabelEl = $("discardLabel");
@@ -34,8 +34,21 @@ function renderPublic(snap) {
   ul.innerHTML = "";
   (snap.players || []).forEach(p => {
     const li = document.createElement("li");
-    const turnMark = (p.playerId === snap.currentPlayerId) ? " ⬅︎ turn" : "";
-    li.textContent = `${p.playerName || p.playerId} | hand=${p.handSize} | uno=${p.hasUno}${turnMark}`;
+    // Apply active-player class to highlight the current player instead of appending a text marker
+    if (p.playerId === snap.currentPlayerId) {
+      li.className = 'active-player';
+    } else {
+      li.className = '';
+    }
+
+    // Use structured spans so CSS (.player-name, .player-cards) applies correctly
+    const playerName = p.playerName || p.playerId || 'Player';
+    const handSize = (p.handSize != null) ? p.handSize : (p.cards || p.count || '-');
+    const unoBadge = p.hasUno ? '<span class="uno-warning-inline">UNO</span>' : '';
+
+    li.innerHTML = `<span class="player-name">${playerName}</span>` +
+                   `<span class="player-cards">${handSize}</span>` +
+                   unoBadge;
     ul.appendChild(li);
   });
 
@@ -45,6 +58,37 @@ function renderPublic(snap) {
 }
 
 function renderHand(hand) {
+
+    const handContainer = document.getElementById('hand-container');
+    const cardCount = hand.length;
+    if (cardCount === 0) return;
+
+
+        const cardWidth = 110; // px
+        const handWidth = handContainer.clientWidth;
+        const maxSpacing = 50; // max spacing for large hands
+
+        let spacing;
+
+        if (cardCount === 1) {
+            spacing = 0;
+        } else {
+            // Calculate the spacing needed to fill the container
+            spacing = (handWidth - cardWidth) / (cardCount - 1);
+
+            // If spacing is too large, cap it to maxSpacing
+            const requiredWidth = cardWidth + spacing * (cardCount - 1);
+            if (requiredWidth > handWidth) {
+                spacing = (handWidth - cardWidth) / (cardCount - 1);
+                spacing = Math.min(spacing, maxSpacing);
+            }
+        }
+
+// Total width of hand for centering
+    const handTotalWidth = cardWidth + spacing * (cardCount - 1);
+    const offsetLeft = (handWidth - handTotalWidth) / 2;
+
+
   const root = $("hand");
   root.innerHTML = "";
 
@@ -52,9 +96,15 @@ function renderHand(hand) {
     const el = document.createElement("span");
     el.className = "card";
     el.textContent = `${idx}: ${formatCard(card)}`;
+    el.style.left = `${offsetLeft + idx * spacing}px`;
+            el.style.zIndex = idx;
+            el.style.bottom = '0px';
     el.addEventListener("click", () => {
       // If this is a wild card, prompt for colour (demo-friendly)
-      let wildColor = null;
+        let wildColor = null;
+
+
+
 
       // Heuristic: if card has value/type like "WILD" or "WILD_DRAW_FOUR"
       const text = JSON.stringify(card).toUpperCase();
@@ -90,8 +140,8 @@ function connectGame() {
     return;
   }
 
-  $("tokenLabel").textContent = token;
-  $("playerLabel").textContent = playerId;
+//  $("tokenLabel").textContent = token;
+//  $("playerLabel").textContent = playerId;
 
   // Persist for refresh
   localStorage.setItem("uno.token", token);
@@ -140,14 +190,14 @@ let tempCardIndex = null;
 
 function playCard(cardIndex, wildColor) {
   if (!stompClient) return;
-  
+
   // If it's a wildcard, show color picker instead of playing immediately
   if (/\bWILD\b/i.test(String(wildColor))) {
     tempCardIndex = cardIndex;
     document.getElementById("colorPicker").style.display = "block";
     return;
   }
-  
+
   console.log("Sending playCard: cardIndex=" + cardIndex + ", wildColor=" + wildColor);
   stompClient.send("/app/game/play", {}, JSON.stringify({
     token,

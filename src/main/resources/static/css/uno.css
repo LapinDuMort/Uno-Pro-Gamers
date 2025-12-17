@@ -1,63 +1,80 @@
+/* ===== Player Hand ===== */
 .hand {
-     position: relative;
-     width: 90vw;
-     height: 150px;
-     margin: 0 auto;
-     padding: 20px 0;
-     --card-width: 200px;
+    position: relative; /* Required for absolute-positioned cards */
+    display: grid;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 22px;
+
+    background: linear-gradient(180deg, #2c3e50, #1f2d3a);
+    padding: 18px 20px 20px 20px;
+    border-radius: 14px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+
+    margin: 0 auto;
+    max-width: 90%;
+    height: 150px;
+    min-height: 150px;
+    max-height: 150px;
+
+    --spacing-unit: 45px; /* Controls card overlap */
 }
-/* Base card */
- .uno-card {
-     position: absolute;
-     bottom: 0;
-     width: 110px;
-     height: 160px;
-     border-radius: 16px;
-     background: var(--card-colour, black);
-     color: white;
-     font-size: 36px;
-     font-weight: bold;
-     text-shadow:
-             1px 1px 0 black,
-            -1px 1px 0 black,
-             1px -1px 0 black,
-            -1px -1px 0 black;
-     display: flex;
-     justify-content: center;
-     align-items: center;
-     cursor: pointer;
-     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5), 0 0 5px rgba(255, 255, 255, 0.1);
-     transition: transform 0.25s ease, z-index 0.25s ease;
+
+/* ===== UNO Card Base ===== */
+.uno-card {
+    position: absolute;
+    bottom: 0;
+    width: 110px;
+    height: 160px;
+    border-radius: 16px;
+
+    background: var(--card-colour, black);
+    color: white;
+    font-size: 36px;
+    font-weight: bold;
+    text-shadow:
+        1px 1px 0 black,
+       -1px 1px 0 black,
+        1px -1px 0 black,
+       -1px -1px 0 black;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5), 0 0 5px rgba(255, 255, 255, 0.1);
+    transition: transform 0.25s ease, z-index 0.25s ease;
+
     /* DYNAMIC POSITIONING for the hand */
-     left: calc(var(--i) * var(--spacing-unit));
-     z-index: var(--i);
+    left: calc(var(--i) * var(--spacing-unit));
+    z-index: var(--i);
 }
-/* Classic white border */
- .uno-card::before {
-     content: "";
-     position: absolute;
-     inset: 4px;
-     border: 4px solid white;
-     border-radius: 12px;
-     pointer-events: none;
+
+/* Card border */
+.uno-card::before {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    border: 4px solid white;
+    border-radius: 12px;
+    pointer-events: none;
 }
-/* Card value behind overlapping cards */
- .uno-card .value {
-     position: relative;
-     z-index: 0;
+
+/* Card value */
+.uno-card .value {
+    position: relative;
+    z-index: 0;
 }
-/* Hover effect for hand cards */
+
+/* Hover effect */
 .hand .uno-card:hover {
     transform: translateY(-20px) scale(1.05);
     z-index: 999;
     box-shadow: 0 8px 15px rgba(0,0,0,0.6);
 }
-/* Disable hover for draw/discard piles */
-.uno-card.single:hover {
-     transform: none;
-     box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-}
-/*(draw/discard cards)*/
+
+/* Single card (draw/discard pile) */
 .uno-card.single {
     background: var(--card-colour, grey);
     width: 110px;
@@ -66,29 +83,163 @@
     margin-left: 0px;
 }
 
+/* Disable hover for draw/discard piles */
+.uno-card.single:hover {
+     transform: none;
+     box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
 
+/* Disabled state for interactive buttons (draw, declare) and cards */
+button[disabled], .uno-card[disabled] {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+}
 
+/* Visual treatment for cards that are not playable (but still shown) */
+.uno-card.unplayable {
+    filter: grayscale(70%);
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+.uno-card.unplayable:hover {
+    transform: none !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+}
 
-
-
+/* ===== Color Popup ===== */
 .color-popup {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
+
+    background: linear-gradient(180deg, #2c3e50, #1f2d3a);
+    padding: 22px;
+
+    border-radius: 14px;
     text-align: center;
-    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    color: #ecf0f1;
+
+    box-shadow: 0 12px 30px rgba(0,0,0,0.5);
     z-index: 9999;
 }
 
-.color-popup button {
-    margin: 5px;
-    padding: 10px 20px;
-    border-radius: 8px;
+/* Popup buttons */
+.color-popup button,
+.wild-btn {
+    margin: 6px;
+    padding: 10px 22px;
+
+    border-radius: 12px;
     border: none;
+
     cursor: pointer;
     font-weight: bold;
+    font-size: 14px;
+
+    box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Hover / click feedback */
+.color-popup button:hover,
+.wild-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(0,0,0,0.55);
+}
+
+.color-popup button:active,
+.wild-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+}
+
+/* ===== Wild Buttons by Color ===== */
+.wild-btn.red { background: #e74c3c; }
+.wild-btn.blue { background: #3498db; }
+.wild-btn.green { background: #2ecc71; }
+.wild-btn.yellow {
+    background: #f1c40f;
+    color: #2c3e50;
+    text-shadow: none;
+}
+
+/* Small UNO icon/button used in player list */
+.uno-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px; /* slightly larger padding */
+    font-size: 0.95rem; /* slightly larger text baseline */
+    border-radius: 10px; /* softer corners for the frame */
+    border: 2px solid rgba(0,0,0,0.12); /* subtle framed border */
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.02));
+    color: #1c1c1c;
+    font-weight: 800;
+    margin-left: 10px;
+    position: relative;
+    width: 40px; /* increased size */
+    height: 40px;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.25); /* gentle lift */
+    transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s linear;
+}
+.uno-icon-btn[disabled] {
+    filter: grayscale(60%);
+    opacity: 0.7;
+    box-shadow: none;
+}
+
+/* Draw the circle and the 'U' letter using ::before */
+.uno-icon-btn::before {
+    content: 'U';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; /* larger circle */
+    height: 28px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #fff7c9, #f1c40f 50%, #e0ac10 100%);
+    color: #1c1c1c;
+    font-weight: 900;
+    font-size: 13px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.35), inset 0 -2px 4px rgba(0,0,0,0.12);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.uno-icon-btn[disabled]::before {
+    background: radial-gradient(circle at 30% 30%, #fff7c9, #f1c40f 50%, #e0ac10 100%);
+    filter: grayscale(60%);
+    box-shadow: none;
+}
+
+/* Hover/active frame effect when enabled */
+.uno-icon-btn:not([disabled]):hover {
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.35);
+}
+.uno-icon-btn:not([disabled])::before {
+    transform: translateY(0);
+}
+
+/* Glowing/pulse effect when UNO is declared for the local player */
+.uno-icon-btn.uno-active {
+    border-color: rgba(241,196,15,0.9);
+    box-shadow: 0 8px 28px rgba(241,196,15,0.12), 0 6px 10px rgba(0,0,0,0.25) inset;
+}
+.uno-icon-btn.uno-active::before {
+    box-shadow: 0 0 10px 3px rgba(241,196,15,0.9), 0 0 22px 8px rgba(241,196,15,0.40) inset;
+    animation: uno-pulse 1.6s infinite ease-in-out;
+}
+
+@keyframes uno-pulse {
+    0% { transform: translateY(0) scale(1); box-shadow: 0 0 6px 1px rgba(241,196,15,0.9); }
+    50% { transform: translateY(-2px) scale(1.04); box-shadow: 0 0 28px 6px rgba(241,196,15,0.95); }
+    100% { transform: translateY(0) scale(1); box-shadow: 0 0 6px 1px rgba(241,196,15,0.9); }
+}
+
+/* Keyboard focus ring for accessibility */
+.uno-icon-btn:focus {
+    outline: 3px solid rgba(66,133,244,0.95);
+    outline-offset: 4px;
 }

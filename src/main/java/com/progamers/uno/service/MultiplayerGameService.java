@@ -224,8 +224,12 @@ public class MultiplayerGameService {
         Map<String, Object> snap = new LinkedHashMap<>();
         snap.put("gameOver", gameOver);
         snap.put("currentPlayerId", getCurrentPlayerId());
+        // back-compat: some clients/readers expect 'currentPlayer'
+        snap.put("currentPlayer", getCurrentPlayerId());
         snap.put("topDiscard", getTopDiscard());
         snap.put("wildColour", getWildColourOrNone());
+        // include current turn direction: 1 = normal/forward, -1 = reversed
+        snap.put("turnDirection", turnDirection);
         snap.put("players", players);
         return snap;
     }

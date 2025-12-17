@@ -1,0 +1,98 @@
+/* ===== Player List Sidebar ===== */
+.player-list {
+    position: fixed;
+    left: 72px;
+    top: 80px;
+    width: 260px; /* slightly wider to comfortably fit framed UNO button */
+    background: linear-gradient(180deg, #2c3e50, #1f2d3a);
+    border-radius: 14px;
+    padding: 14px;
+    color: #ecf0f1;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+/* Title */
+.player-list h2 {
+    margin: 0 0 12px;
+    text-align: center;
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+    padding-bottom: 6px;
+}
+
+/* List reset */
+.player-list ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Player row - unified sizing */
+.player-list ul li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    border-radius: 10px;
+    background: #34495e;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    gap: 8px;
+    box-sizing: border-box;
+    height: 56px; /* fixed row height */
+    min-height: 56px;
+}
+
+/* Player name */
+.player-list .player-name {
+    flex: 1 1 auto;
+    min-width: 0; /* allow ellipsis */
+    font-weight: 600;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Card count badge */
+.player-list .player-cards {
+    flex: 0 0 56px; /* fixed width for numbers / action area */
+    font-size: 0.9rem;
+    padding: 6px 8px;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.25);
+    text-align: center;
+    margin-left: 6px;
+}
+
+/* Active player highlight */
+.player-list li.active-player {
+    background: linear-gradient(135deg, #f1c40f, #f39c12);
+    color: #1c1c1c;
+    font-weight: bold;
+}
+
+/* Active card badge contrast */
+.player-list li.active-player .player-cards {
+    background: rgba(0,0,0,0.25);
+}
+
+/* UNO warning */
+.uno-warning {
+    grid-column: span 2;
+    margin-top: 4px;
+    font-size: 0.75rem;
+    color: #e74c3c;
+    font-weight: bold;
+    text-align: center;
+    letter-spacing: 1px;
+}
+.uno-warning-inline {
+    margin-left: 6px;       /* small space after cards */
+    color: #e74c3c;
+    font-weight: bold;
+    font-size: 0.85rem;
+}
