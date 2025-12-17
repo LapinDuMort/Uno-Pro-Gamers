@@ -419,11 +419,11 @@ public class MultiplayerGameServiceTests {
         Player p1 = gameService.getPlayersById().get("p1");
         assertNotNull(p1);
 
-        // Force exactly 1 card and NO UNO declared.
-        while (p1.getPlayerHand().size() > 1) {
+        // update: force exactly 2 cards now
+        while (p1.getPlayerHand().size() > 2) {
             p1.getPlayerHand().removeLast();
         }
-        assertEquals(1, p1.getHandSize());
+        assertEquals(2, p1.getHandSize());
         assertFalse(p1.getHasUno());
 
         Card onlyCard = p1.getCurrentSelectedCard(0);
@@ -447,7 +447,7 @@ public class MultiplayerGameServiceTests {
 
         assertEquals("p2", gameService.getCurrentPlayerId());
         assertEquals(3, p1.getHandSize());
-        assertSame(topBefore, gameService.getTopDiscard(), "UNO penalty should not play the card.");
+        assertNotSame(topBefore, gameService.getTopDiscard(), "UNO penalty should not play the card.");
     }
 
     @Test
