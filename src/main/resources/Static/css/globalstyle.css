@@ -63,3 +63,23 @@ h1
     transform: translateY(0);
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
+
+/* Disabled state */
+.draw-button:disabled {
+    background: linear-gradient(180deg, #2c3e50, #1f2d3a);
+    filter: grayscale(50%);
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+    animation: none;
+}
+
+/* Flashing animation */
+@keyframes flash-yellow {
+    0%, 100% { box-shadow: 0 6px 16px rgba(0,0,0,0.35); }
+    50% { box-shadow: 0 6px 20px 4px yellow, 0 6px 16px rgba(0,0,0,0.35); }
+}
+
+.draw-button:not(:disabled) {
+    animation: flash-yellow 1s infinite;
+}

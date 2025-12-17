@@ -39,9 +39,15 @@ window.onload = () => {
         card.style.left = `${offsetLeft + index * spacing}px`;
         card.style.zIndex = index;
 
-        // Set background color
+        // Set background color correctly
+        const value = card.dataset.value;
         const colour = card.dataset.colour;
-        card.style.backgroundColor = (colour && colour.toLowerCase() === 'wild') ? 'black' : colour;
+
+        if (value === 'WILD' || value === 'WILD_DRAW_FOUR') {
+            card.style.backgroundColor = 'black';
+        } else if (colour) {
+            card.style.backgroundColor = colour.toLowerCase();
+        }
 
         // Click lift
         card.addEventListener('click', () => {

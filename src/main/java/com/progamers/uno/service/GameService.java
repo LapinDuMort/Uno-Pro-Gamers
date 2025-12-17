@@ -1,5 +1,6 @@
 package com.progamers.uno.service;
 
+import com.progamers.uno.domain.cards.PlayableCardView;
 import com.progamers.uno.domain.game.DiscardPile;
 import com.progamers.uno.domain.game.SpecialCards;
 import com.progamers.uno.domain.Player;
@@ -125,11 +126,12 @@ public class GameService {
         this.game.getDiscardPile().addToPile(
                 this.activePlayer.playCard(index));
 
-        checkSpecialCard(selectedCard);
-
         if (this.activePlayer.getHandSize() == 0) {
             this.gameOver = true;
         }
+
+        checkSpecialCard(selectedCard);
+
         this.turnTracker = this.game.incrementTurn(this.turnTracker, this.numberOfPlayers, this.isReverse);
         whoseTurn();
     }
@@ -149,5 +151,17 @@ public class GameService {
             this.turnTracker = this.game.incrementTurn(this.turnTracker, this.numberOfPlayers, this.isReverse);
         }
         this.isReverse = SpecialCards.checkForReverse(selectedCard.getValue(), this.isReverse);
+    }
+
+    public List<PlayableCardView> getplayableHand() {
+        return getPlayerHand().stream()
+                .map(card -> new PlayableCardView(card, getGame().isValidMove(getGame().getDiscardPile(), card)))
+                .toList();
+    }
+
+    public boolean hasPlayableCard() {
+
+        List<PlayableCardView> playableHand = getplayableHand();
+        return playableHand.stream().anyMatch(PlayableCardView::isPlayable);
     }
 }

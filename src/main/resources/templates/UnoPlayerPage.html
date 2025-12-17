@@ -11,7 +11,6 @@
     <body>
     <div class="player-list">
         <h2>Players</h2>
-
         <h2 th:text="${isReversed} ? 'Turn Order: 🔄 Reversed' : 'Turn Order: ▶️ Normal'"></h2>
         <ul>
             <li th:each="player : ${players}"
@@ -20,17 +19,13 @@
 
             <span class="player-name"
                   th:text="${player.playerName}"></span>
-
                 <span class="player-cards" th:text="${player.handSize} + ' cards'"></span>
-
                 <span th:if="${player.hasUno}"
                       class="uno-warning-inline">UNO!</span>
-
                 <div class="uno-controls">
                     <form th:if="${!gameOver and !player.hasUno and player == activePlayer}"
                           th:action="@{/uno}"
                           method="post">
-
                         <button type="submit"
                                 class="uno-button"
                                 th:disabled="${player.handSize > 2}">
@@ -48,7 +43,11 @@
             <h2>Draw Pile</h2>
             <div class="uno-card single">?</div>
             <form th:action="@{/draw}" method="post">
-                <button class="draw-button">Draw Card</button>
+                <button class="draw-button"
+                        type="submit"
+                        th:disabled="${hasPlayableCard}">
+                    Draw Card
+                </button>
             </form>
         </div>
         <div class="pile">
@@ -59,23 +58,29 @@
             </div>
         </div>
     </div>
-
     <h1>Your Hand</h1>
     <div class="hand" id="hand-container">
-        <form th:each="card, iter : ${playerHand}"
-              th:id="'playForm' + ${iter.index}"
+        <form th:each="pc, iter : ${playerHand}"
+              th:if="${pc != null}"
               th:action="@{/play}"
               method="post">
-            <input type="hidden" name="cardIndex" th:value="${iter.index}" />
+            <input type="hidden"
+                   name="cardIndex"
+                   th:value="${iter.index}" />
             <button type="button"
                     class="uno-card"
-                    th:attr="data-index=${iter.index}, data-colour=${card.colour.name()}"
-                    th:onclick="|playCard(this)|">
-                <div class="value" th:text="${card.value}"></div>
+                    th:classappend="${!pc.playable} ? ' card-disabled' : ''"
+                    th:attr="
+            data-index=${iter.index},
+            data-value=${pc.card.value},
+            data-colour=${pc.card.colour.name()},
+            data-playable=${pc.playable}">
+                <div class="value"
+                     th:text="${pc.card != null ? pc.card.value : ''}">
+                </div>
             </button>
         </form>
-        </div>
-
+    </div>
     <!-- Wild card color picker popup -->
     <div id="colorPicker" class="color-popup" style="display:none;">
         <h3>Pick a Color</h3>

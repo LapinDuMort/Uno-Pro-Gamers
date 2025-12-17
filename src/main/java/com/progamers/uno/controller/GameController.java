@@ -1,5 +1,8 @@
 package com.progamers.uno.controller;
 
+import com.progamers.uno.domain.cards.Card;
+import com.progamers.uno.domain.cards.PlayableCardView;
+import com.progamers.uno.domain.game.DiscardPile;
 import com.progamers.uno.service.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -31,7 +34,9 @@ public class GameController {
 
     @GetMapping("/playerpage")
     public String viewPlayer(Model model) {
-        model.addAttribute("playerHand", gameService.getPlayerHand());
+
+        model.addAttribute("hasPlayableCard", gameService.hasPlayableCard());
+        model.addAttribute("playerHand", gameService.getplayableHand());
         model.addAttribute("discardCard", gameService.getTopDiscard());
         model.addAttribute("wildColour", gameService.checkTopDiscardWild());
         model.addAttribute("gameOver", gameService.isGameOver());
