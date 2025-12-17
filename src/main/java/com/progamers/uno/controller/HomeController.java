@@ -13,4 +13,9 @@ public class HomeController {
 
     @GetMapping("/lobby")
     public String lobby() { return "lobby/index"; }
+
+    @GetMapping("/game")
+    public String game() {
+        return "game/game";
+    }
 }

@@ -36,4 +36,11 @@ public class HomeControllerTests {
                 .andExpect(view().name("lobby/index"))
                 .andExpect(content().string(containsString("<h2>UNO Lobby</h2>")));
     }
+
+    @Test
+    void testGame_whenRequested_thenRendersGameView() throws Exception {
+        mockMvc.perform(get("/game"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("game/game"));
+    }
 }
