@@ -1,6 +1,7 @@
 package com.progamers.uno.service;
 
 import com.progamers.uno.domain.cards.Card;
+import com.progamers.uno.domain.cards.Colour;
 import com.progamers.uno.domain.cards.Value;
 import com.progamers.uno.domain.game.Game;
 import com.progamers.uno.domain.multiplayer.lobby.LobbyPlayer;
@@ -41,7 +42,14 @@ public class MultiplayerGameService {
         // Fresh game each start (demo-safe)
         Game g = new Game();
         g.getCardDeck().shuffle();
-        g.getDiscardPile().addToPile(g.getCardDeck().drawCard());
+
+        boolean wildCard = true;
+        while (wildCard) {
+            g.getDiscardPile().addToPile(g.getCardDeck().drawCard());
+            if (!g.getDiscardPile().getTopCard().getColour().equals(Colour.Wild)) {
+                wildCard = false;
+            }
+        }
 
         // Reset multiplayer containers
         playersById.clear();
@@ -174,6 +182,15 @@ public class MultiplayerGameService {
             game.drawCards(nextPlayer, 2);
             advanceTurn();
             return;
+
+        } else if (playedCard.getValue().equals(Value.WildFour)) {
+            // WildFour card: next player draws 4 cards and their turn is skipped
+            advanceTurn();
+            Player nextPlayer = requirePlayer(getCurrentPlayerId());
+            game.drawCards(nextPlayer, 4);
+            advanceTurn();
+            return;
+
         } else if (playedCard.getValue().equals(Value.Reverse)) {
             // Reverse card: reverse the direction of play
             turnDirection *= -1;
