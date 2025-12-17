@@ -18,61 +18,36 @@ public class GameWebSocketController {
 
     @MessageMapping("/game/play")
     public void play(PlayCardRequestDTO dto) throws Exception {
-        try {
-            gameService.playCard(dto.getPlayerId(), dto.getCardIndex(), dto.getWildColour());
-            publish(dto.getToken());
-        } catch (Exception e) {
-            System.err.println("Play card error for " + dto.getPlayerId() + ": " + e.getMessage());
-            e.printStackTrace();
-            throw e;
-        }
+        gameService.playCard(dto.getPlayerId(), dto.getCardIndex(), dto.getWildColour());
+        publish(dto.getToken());
     }
 
     @MessageMapping("/game/draw")
     public void draw(DrawCardRequestDTO dto) {
-        try {
-            gameService.drawCard(dto.getPlayerId());
-            publish(dto.getToken());
-        } catch (Exception e) {
-            System.err.println("Draw card error for " + dto.getPlayerId() + ": " + e.getMessage());
-            e.printStackTrace();
-        }
+        gameService.drawCard(dto.getPlayerId());
+        publish(dto.getToken());
     }
 
     @MessageMapping("/game/uno")
     public void uno(DeclareUnoRequestDTO dto) {
-        try {
-            gameService.declareUno(dto.getPlayerId());
-            publish(dto.getToken());
-        } catch (Exception e) {
-            System.err.println("Declare uno error for " + dto.getPlayerId() + ": " + e.getMessage());
-            e.printStackTrace();
-        }
+        gameService.declareUno(dto.getPlayerId());
+        publish(dto.getToken());
     }
 
     @MessageMapping("/game/sync")
     public void syncGameState(PlayCardRequestDTO dto) {
-        System.out.println("=== Client requesting game sync for token: " + dto.getToken() + ", playerId: " + dto.getPlayerId());
-        try {
-            publish(dto.getToken());
-        } catch (Exception e) {
-            System.err.println("Sync error: " + e.getMessage());
-            e.printStackTrace();
-        }
+        publish(dto.getToken());
     }
+
+    /* --- helpers --- */
 
     private void publish(String token) {
         // public snapshot
-        messaging.convertAndSend(
-                "/topic/game/" + token,
-                gameService.publicSnapshot()
-        );
+        messaging.convertAndSend("/topic/game/" + token, gameService.publicSnapshot());
 
         // per-player hands (demo-safe)
         for (String playerId : gameService.getTurnOrder()) {
-            messaging.convertAndSend(
-                    "/topic/game/" + token + "/hand/" + playerId,
-                    gameService.getHand(playerId)
+            messaging.convertAndSend("/topic/game/" + token + "/hand/" + playerId, gameService.getHand(playerId)
             );
         }
     }
