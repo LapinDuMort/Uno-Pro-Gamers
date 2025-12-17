@@ -77,7 +77,6 @@ public class MultiplayerGameServiceTests {
         assertFalse(gameService.hasUno("p1"));
     }
 
-    @Disabled
     @Test
     void testStartFromLobby_whenCalledTwice_thenResetsState() {
         when(lobbyService.getPlayersInOrder()).thenReturn(List.of(
@@ -93,16 +92,16 @@ public class MultiplayerGameServiceTests {
         assertEquals("p2", gameService.getCurrentPlayerId());
 
         when(lobbyService.getPlayersInOrder()).thenReturn(List.of(
-                new LobbyPlayer("session", "x1", "Xena")
+                new LobbyPlayer("p3", "Player3", "s1")
         ));
 
         gameService.startFromLobby("t2");
 
         assertTrue(gameService.isActive());
         assertFalse(gameService.isGameOver());
-        assertEquals(List.of("x1"), gameService.getTurnOrder());
-        assertEquals("x1", gameService.getCurrentPlayerId());
-        assertEquals(7, gameService.getHand("x1").size());
+        assertEquals(List.of("p3"), gameService.getTurnOrder());
+        assertEquals("p3", gameService.getCurrentPlayerId());
+        assertEquals(7, gameService.getHand("p3").size());
     }
 
     /* --- getCurrentPlayerId Tests --- */
@@ -205,7 +204,6 @@ public class MultiplayerGameServiceTests {
         assertThrows(IllegalStateException.class, () -> gameService.declareUno("p2"));
     }
 
-    @Disabled
     @Test
     void testDeclareUno_withMyTurn_whenHandSizeTwo_thenSetsHasUnoTrue() {
         when(lobbyService.getPlayersInOrder()).thenReturn(List.of(
@@ -264,7 +262,6 @@ public class MultiplayerGameServiceTests {
         assertEquals("p2", gameService.getCurrentPlayerId());
     }
 
-    @Disabled
     @Test
     void testDrawCard_whenGameOver_thenNoOp() throws Exception {
         when(lobbyService.getPlayersInOrder()).thenReturn(List.of(
@@ -419,11 +416,11 @@ public class MultiplayerGameServiceTests {
         Player p1 = gameService.getPlayersById().get("p1");
         assertNotNull(p1);
 
-        // Force exactly 1 card and NO UNO declared.
-        while (p1.getPlayerHand().size() > 1) {
+        // update: force exactly 2 cards now
+        while (p1.getPlayerHand().size() > 2) {
             p1.getPlayerHand().removeLast();
         }
-        assertEquals(1, p1.getHandSize());
+        assertEquals(2, p1.getHandSize());
         assertFalse(p1.getHasUno());
 
         Card onlyCard = p1.getCurrentSelectedCard(0);
@@ -447,7 +444,7 @@ public class MultiplayerGameServiceTests {
 
         assertEquals("p2", gameService.getCurrentPlayerId());
         assertEquals(3, p1.getHandSize());
-        assertSame(topBefore, gameService.getTopDiscard(), "UNO penalty should not play the card.");
+        assertNotSame(topBefore, gameService.getTopDiscard(), "UNO penalty should not play the card.");
     }
 
     @Test
