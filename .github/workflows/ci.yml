@@ -4,34 +4,46 @@ on:
   push:
     branches:
       - main
+      - development
   pull_request:
     branches:
       - main
+      - development
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
-      # checkout the code from the repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # setup jdk 21
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
+          cache: gradle
 
-      # make gradle wrapper executable
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      # show detected test files using gradle task
       - name: Show detected test files
         run: ./gradlew listTestFiles
 
-      # runs tests
-      - name: Run tests
-        run: ./gradlew test --debug
+      - name: Run tests + JaCoCo report
+        run: ./gradlew clean test jacocoTestReport
+
+      - name: Upload JaCoCo HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-html-report
+          path: build/reports/jacoco/test/html
+
+      - name: Upload JaCoCo XML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-xml-report
+          path: build/reports/jacoco/test/jacocoTestReport.xml
