@@ -1,6 +1,7 @@
 package com.progamers.uno.service;
 
 import com.progamers.uno.domain.cards.Card;
+import com.progamers.uno.domain.cards.Colour;
 import com.progamers.uno.domain.cards.Value;
 import com.progamers.uno.domain.game.Game;
 import com.progamers.uno.domain.multiplayer.lobby.LobbyPlayer;
@@ -41,7 +42,14 @@ public class MultiplayerGameService {
         // Fresh game each start (demo-safe)
         Game g = new Game();
         g.getCardDeck().shuffle();
-        g.getDiscardPile().addToPile(g.getCardDeck().drawCard());
+
+        boolean wildCard = true;
+        while (wildCard) {
+            g.getDiscardPile().addToPile(g.getCardDeck().drawCard());
+            if (!g.getDiscardPile().getTopCard().getColour().equals(Colour.Wild)) {
+                wildCard = false;
+            }
+        }
 
         // Reset multiplayer containers
         playersById.clear();
