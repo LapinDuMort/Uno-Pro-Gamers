@@ -6,9 +6,17 @@
     <title>UNO Game</title>
     <link rel="stylesheet" href="/css/globalstyle.css">
     <link rel="stylesheet" href="/css/uno.css">
+    <link rel="stylesheet" href="/css/new.css">
 </head>
 <body>
 <h1>UNO Game</h1>
+
+<div class="player-list">
+    <h2>Players</h2>
+    <h2 id="turnOrderLabel">Turn Order: ?</h2>
+    <ul id="players"></ul>
+</div>
+
 <div class="game-board">
     <div class="pile">
         <h2>Draw Pile</h2>
@@ -24,17 +32,12 @@
 </div>
 
 <h2>Your Hand</h2>
+<!-- Removed top-level UNO button; Declare UNO will be shown beside the local player in the player list -->
 <div style="text-align: center; margin: 15px 0;">
-    <button id="declareButton" class="draw-button" onclick="declareUno()">Declare UNO</button>
 </div>
 <div id="handSize">Hand Size - 0</div>
 <div id="handContainer" class="hand"></div>
 
-<!-- UNO declaration controls -->
-<div class="uno-controls">
-    <p id="unoStatus" style="display:none;">UNO declared!</p>
-    <p id="unoStatusNot">UNO not declared!</p>
-</div>
 
 <!-- Wild card color picker popup -->
 <div id="colorPicker" class="color-popup" style="display:none;">
@@ -44,19 +47,6 @@
     <button type="button" onclick="chooseColor('Green')" style="background-color: #66BB6A; color: white;">Green</button>
     <button type="button" onclick="chooseColor('Blue')" style="background-color: #42A5F5; color: white;">Blue</button>
 </div>
-
-<!-- Players section -->
-<h2>Players</h2>
-<ul id="players"></ul>
-
-<!-- Game status info -->
-<div style="margin-top: 20px; padding: 10px; background: #f0f0f0; border-radius: 5px; font-size: 0.9em;">
-    <p><b>Current Turn:</b> <span id="turnLabel">?</span></p>
-    <p><b>Wild Colour:</b> <span id="wildLabel">None</span></p>
-    <p><b>Token:</b> <span id="tokenLabel" style="word-break: break-all;">-</span></p>
-    <p><b>Player:</b> <span id="playerLabel" style="word-break: break-all;">-</span></p>
-</div>
-
 <!-- Debug log -->
 <pre id="log" style="margin-top: 12px; border: 1px solid #ccc; padding: 10px; height: 120px; overflow: auto; font-size: 0.75em; white-space: pre-wrap;"></pre>
 
@@ -71,75 +61,279 @@
         "SKIP": "⏭", "REVERSE": "⟳", "DRAWTWO": "+2", "WILD": "★", "WILDFOUR": "★+4"
     };
 
-    // Enhance renderPublic to update styled discard card and game info
-    const originalRenderPublic = window.renderPublic;
+    // Page-level renderPublic owns all rendering (don't delegate to previously defined renderer)
     window.renderPublic = function(snap) {
-        originalRenderPublic(snap);
-        
         // Update styled discard card
         const discardEl = document.getElementById("discardCard");
         const discardValueEl = document.getElementById("discardValue");
-        if (discardEl && snap.topDiscard) {
-            const discardColour = snap.topDiscard.colour ? String(snap.topDiscard.colour) : '';
-            const topColour = /\bWILD\b/i.test(discardColour) ? (snap.wildColour || 'black') : discardColour;
-            console.log('Setting discard card colour to:', topColour, 'from', discardColour, 'card:', snap.topDiscard);
-            discardEl.style.setProperty('--card-colour', topColour);
-            
+        if (discardEl && snap && snap.topDiscard) {
+            const discardColour = (snap.topDiscard.colour || snap.topDiscard.color) ? String(snap.topDiscard.colour || snap.topDiscard.color) : '';
+            const topColour = /\bWILD\b/i.test(discardColour) ? (snap.wildColour || snap.wildColor || 'black') : discardColour;
+            discardEl.style.setProperty('--card-colour', topColour || 'grey');
+
             if (discardValueEl) {
-                const raw = String(snap.topDiscard.value || '').toUpperCase();
-                const displayValue = valueMap.hasOwnProperty(raw) ? valueMap[raw] : snap.topDiscard.value;
-                console.log('Setting discard value to:', displayValue);
+                const raw = String(snap.topDiscard.value || snap.topDiscard.val || '').toUpperCase();
+                const displayValue = Object.prototype.hasOwnProperty.call(valueMap, raw) ? valueMap[raw] : (snap.topDiscard.value || snap.topDiscard.val || '?');
                 discardValueEl.textContent = displayValue;
             }
-        } else {
-            console.log('Missing discardEl or topDiscard:', {hasEl: !!discardEl, hasCard: !!snap.topDiscard});
+        } else if (discardEl) {
+            discardEl.style.setProperty('--card-colour', 'grey');
+            if (discardValueEl) discardValueEl.textContent = '?';
+        }
+
+        // Update other labels and players list
+        if (snap) {
+            const turnLabel = document.getElementById('turnLabel'); if (turnLabel) turnLabel.textContent = snap.currentPlayerId || snap.currentPlayer || '?';
+            const wildLabel = document.getElementById('wildLabel'); if (wildLabel) wildLabel.textContent = snap.wildColour || snap.wildColor || 'None';
+            const tokenLabel = document.getElementById('tokenLabel'); if (tokenLabel) tokenLabel.textContent = snap.token || tokenLabel.textContent;
+            // Turn order label: show Reversed when turnDirection === -1
+            const turnOrderLabel = document.getElementById('turnOrderLabel');
+            if (turnOrderLabel) {
+                const dir = (snap.turnDirection !== undefined && snap.turnDirection !== null) ? Number(snap.turnDirection) : 1;
+                turnOrderLabel.textContent = dir === -1 ? 'Turn Order: 🔄 Reversed' : 'Turn Order: ▶️ Normal';
+            }
+
+            // Determine who is the current player and who is the local player
+            const currentPlayer = snap.currentPlayerId || snap.currentPlayer || null;
+            const localId = (typeof playerId !== 'undefined' && playerId !== null) ? playerId : (typeof window.playerId !== 'undefined' ? window.playerId : null);
+
+            // expose whether it's the local player's turn to other scripts
+            window.isMyTurn = !!(localId && currentPlayer && localId === currentPlayer);
+
+            // keep latest public snapshot for renderHand to consult topDiscard and wild colour
+            window.latestPublicSnapshot = snap;
+
+            // Enable/disable draw button: only enabled when it's the local player's turn
+            try {
+                const drawBtnEl = document.getElementById('drawBtn');
+                if (drawBtnEl) {
+                    const enabled = !!(localId && currentPlayer && localId === currentPlayer);
+                    drawBtnEl.disabled = !enabled;
+                    drawBtnEl.setAttribute('aria-disabled', (!enabled).toString());
+                    drawBtnEl.style.opacity = enabled ? '1' : '0.6';
+                    drawBtnEl.style.cursor = enabled ? 'pointer' : 'not-allowed';
+                }
+            } catch (e) { console.warn('Could not set draw button state', e); }
+
+            const playersEl = document.getElementById('players');
+            if (playersEl && Array.isArray(snap.players)) {
+                playersEl.innerHTML = '';
+                // Render players in visual turn order starting from the current player
+                const orig = Array.isArray(snap.players) ? snap.players.slice() : [];
+                const dir = (snap.turnDirection !== undefined && snap.turnDirection !== null) ? Number(snap.turnDirection) : 1;
+                const startId = snap.currentPlayerId || snap.currentPlayer || (orig.length ? orig[0].playerId : null);
+                const playersToRender = [];
+                if (!startId || orig.length === 0) {
+                    // fallback to original order
+                    orig.forEach(p => playersToRender.push(p));
+                } else {
+                    // find index of startId in orig
+                    const idx = orig.findIndex(p => p.playerId === startId);
+                    if (idx === -1) {
+                        // not found; fallback
+                        orig.forEach(p => playersToRender.push(p));
+                    } else {
+                        // rotate according to direction
+                        for (let i = 0; i < orig.length; i++) {
+                            const pos = (idx + i * dir + orig.length) % orig.length;
+                            playersToRender.push(orig[pos]);
+                        }
+                    }
+                }
+
+                playersToRender.forEach(p => {
+                    const li = document.createElement('li');
+                    // mark active player with class so CSS highlight applies
+                    if (p.playerId === (snap.currentPlayerId || snap.currentPlayer)) li.className = 'active-player';
+
+                    const nameSpan = document.createElement('span');
+                    nameSpan.className = 'player-name';
+                    nameSpan.textContent = p.playerName || p.playerId || 'Player';
+
+                    const cardsSpan = document.createElement('span');
+                    cardsSpan.className = 'player-cards';
+                    cardsSpan.textContent = (p.handSize != null) ? p.handSize : (p.cards || p.count || '-');
+
+                    li.appendChild(nameSpan);
+                    li.appendChild(cardsSpan);
+
+                    // If this entry is the local player, add a Declare UNO button beside the card count
+                    try {
+                        if (localId && p.playerId === localId) {
+                            const declareBtn = document.createElement('button');
+                            declareBtn.type = 'button';
+                            declareBtn.className = 'uno-icon-btn';
+                            declareBtn.style.marginLeft = '8px';
+                            declareBtn.title = 'Declare UNO';
+                            declareBtn.setAttribute('aria-label', 'Declare UNO');
+                            // render icon via CSS ::before; keep innerHTML empty for accessibility
+                            declareBtn.innerHTML = '';
+                            // disable unless it's the local player's turn
+                            const canDeclare = !!(currentPlayer && localId === currentPlayer);
+                            declareBtn.disabled = !canDeclare;
+                            declareBtn.setAttribute('aria-disabled', (!canDeclare).toString());
+                            declareBtn.title = canDeclare ? 'Declare UNO' : 'Disabled: not your turn';
+                            declareBtn.style.opacity = canDeclare ? '1' : '0.6';
+                            declareBtn.style.cursor = canDeclare ? 'pointer' : 'not-allowed';
+                            declareBtn.addEventListener('click', function (e) {
+                                e.stopPropagation();
+                                if (!declareBtn.disabled && typeof declareUno === 'function') declareUno();
+                            });
+                            li.appendChild(declareBtn);
+
+                            // If this local player currently has UNO, highlight the button with a glow and update tooltip
+                            if (p.hasUno) {
+                                declareBtn.classList.add('uno-active');
+                                declareBtn.title = (declareBtn.title || 'Declare UNO') + ' — UNO declared';
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('Could not add Declare UNO button', e);
+                    }
+
+                    // If player has UNO and there's no local declare button (other players), append badge
+                    if (p.hasUno) {
+                        // if this is the local player's row we've already applied glow to the button above
+                        if (!(localId && p.playerId === localId)) {
+                            const unoBadge = document.createElement('span');
+                            unoBadge.className = 'uno-warning-inline';
+                            unoBadge.textContent = 'UNO';
+                            li.appendChild(unoBadge);
+                        }
+                    }
+
+                    playersEl.appendChild(li);
+                });
+            }
         }
     };
 
     // Enhance renderHand to display styled card buttons
     const originalRenderHand = window.renderHand;
     window.renderHand = function(hand) {
+        try { /* don't call original - custom rendering below */ } catch(e) { console.warn(e); }
+
         const root = document.getElementById("handContainer");
         root.innerHTML = "";
-        
-        if (!hand) return;
-        
+
+        if (!hand || !Array.isArray(hand)) return;
+
+        // persist latest hand for other logic
+        window.latestHand = hand;
+
+        // Determine top discard info from latest public snapshot (if available)
+        const snap = window.latestPublicSnapshot || null;
+        const top = snap && snap.topDiscard ? snap.topDiscard : null;
+        let topColour = '';
+        let topVal = '';
+        if (top) {
+            topColour = (top.colour || top.color) ? String(top.colour || top.color) : '';
+            const isWildTop = /\bWILD\b/i.test(topColour) || /\bWILD\b/i.test(String(top.value || top.val || ''));
+            if (isWildTop) {
+                topColour = (snap && (snap.wildColour || snap.wildColor)) ? String(snap.wildColour || snap.wildColor) : '';
+            }
+            topVal = String(top.value || top.val || '').toUpperCase();
+        }
+
+        // If we're the client owning this hand, determine if any card is playable.
+        // If any card is playable, the draw button should be disabled (can't draw when you can play).
+        let anyPlayable = false;
+        // quick check without modifying DOM yet
+        for (let i = 0; i < hand.length; i++) {
+            const c = hand[i];
+            const cardColour = (c && (c.colour || c.color)) ? String(c.colour || c.color) : '';
+            const rawValChk = String(c && (c.value || c.val) || '').toUpperCase();
+            const isWildCardChk = /\bWILD\b/i.test(cardColour) || /\bWILD\b/i.test(rawValChk);
+            let playableChk = false;
+            // If there's no top discard, treat as no playable cards (drawing allowed)
+            if (!top) playableChk = false;
+            else {
+                if (isWildCardChk) playableChk = true;
+                else if (topColour && cardColour && topColour.toLowerCase() === cardColour.toLowerCase()) playableChk = true;
+                else if (topVal && rawValChk && topVal === rawValChk) playableChk = true;
+            }
+            if (playableChk) { anyPlayable = true; break; }
+        }
+
+        // Update draw button state: only enabled when it's your turn AND you have no playable cards
+        try {
+            const drawBtnEl = document.getElementById('drawBtn');
+            if (drawBtnEl) {
+                const myTurn = !!window.isMyTurn;
+                const enabled = myTurn && !anyPlayable;
+                drawBtnEl.disabled = !enabled;
+                drawBtnEl.setAttribute('aria-disabled', (!enabled).toString());
+                drawBtnEl.title = enabled ? 'Draw Card' : (myTurn ? 'Disabled: you have playable cards' : 'Disabled: not your turn');
+                drawBtnEl.style.opacity = enabled ? '1' : '0.6';
+                drawBtnEl.style.cursor = enabled ? 'pointer' : 'not-allowed';
+            }
+        } catch (e) { console.warn('Could not update draw button based on hand', e); }
+
         const cardCount = hand.length;
         root.style.setProperty('--total-cards', cardCount);
-        if (cardCount > 1) {
-            root.style.setProperty('--spacing-unit', ((90 * 10 - 110) / (cardCount - 1)) + 'vw / 10');
-        }
-        
+        // simple spacing unit
+        const spacing = Math.max(4, Math.min(12, Math.floor(80 / Math.max(1, cardCount - 1))));
+        root.style.setProperty('--spacing-unit', spacing + 'vw');
+
         hand.forEach((card, idx) => {
             const btn = document.createElement('button');
-            btn.className = 'uno-card';
-            btn.type = 'button';
-            
-            const cardColour = card && card.colour ? String(card.colour) : 'Black';
+            btn.className = 'uno-card'; btn.type = 'button';
+
+            const cardColour = (card && (card.colour || card.color)) ? String(card.colour || card.color) : 'Black';
             const cssColour = /\bWILD\b/i.test(cardColour) ? 'black' : cardColour;
             btn.style.setProperty('--card-colour', cssColour);
             btn.style.setProperty('--i', idx);
             btn.dataset.index = idx;
             btn.dataset.colour = cardColour;
-            btn.onclick = function () { playCard(this.dataset.index, this.dataset.colour); };
-            
+
+            // Determine playability based on top discard (color or value match) or wilds
+            const rawVal = String(card && (card.value || card.val) || '').toUpperCase();
+            const isWildCard = /\bWILD\b/i.test(cardColour) || /\bWILD\b/i.test(rawVal);
+            let playable = false;
+            // if there's no top discard, treat as no playable cards (drawing allowed)
+            if (!top) {
+                playable = false;
+            } else {
+                if (isWildCard) playable = true;
+                else if (topColour && cardColour && topColour.toLowerCase() === cardColour.toLowerCase()) playable = true;
+                else if (topVal && rawVal && topVal === rawVal) playable = true;
+            }
+
+            const myTurn = !!window.isMyTurn;
+            const disabled = !playable || !myTurn;
+            btn.disabled = disabled;
+            btn.setAttribute('aria-disabled', (disabled).toString());
+            if (!playable) {
+                btn.classList.add('unplayable');
+                btn.title = 'Cannot play on current discard';
+            } else {
+                btn.classList.remove('unplayable');
+                btn.title = myTurn ? 'Play card' : 'Disabled: not your turn';
+            }
+
+            btn.addEventListener('click', function() {
+                if (btn.disabled) {
+                    console.warn('Card click ignored: disabled or not playable');
+                    return;
+                }
+                if (typeof playCard === 'function') playCard(this.dataset.index, this.dataset.colour);
+            });
+
             const valDiv = document.createElement('div');
             valDiv.className = 'value';
-            const raw = card && card.value ? String(card.value).toUpperCase() : '';
-            valDiv.textContent = valueMap.hasOwnProperty(raw) ? valueMap[raw] : (card ? card.value : '');
+            const raw = String(card && (card.value || card.val) || '').toUpperCase();
+            valDiv.textContent = Object.prototype.hasOwnProperty.call(valueMap, raw) ? valueMap[raw] : (card ? (card.value || card.val || '') : '');
             btn.appendChild(valDiv);
-            
-            const wrapper = document.createElement('div');
-            wrapper.style.display = 'inline-block';
-            wrapper.appendChild(btn);
+
+            const wrapper = document.createElement('div'); wrapper.style.display = 'inline-block'; wrapper.appendChild(btn);
             root.appendChild(wrapper);
         });
-        
+
         document.getElementById('handSize').textContent = 'Hand Size - ' + hand.length;
     };
 
+
     connectGame();
 </script>
-
 </body>
 </html>
