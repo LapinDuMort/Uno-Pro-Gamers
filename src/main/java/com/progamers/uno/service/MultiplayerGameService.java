@@ -155,8 +155,9 @@ public class MultiplayerGameService {
         if (!game.isValidMove(top, selected)) return;
 
         // Your existing “UNO penalty” rule, now per-player
-        if (p.getHandSize() == 1 && !p.getHasUno()) {
+        if (p.getHandSize() == 2 && !p.getHasUno()) {
             game.drawCards(p, 2);
+            game.getDiscardPile().addToPile(p.playCard(cardIndex));
             advanceTurn();
             return;
         }
